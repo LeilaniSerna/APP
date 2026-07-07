@@ -1,0 +1,45 @@
+<ion-content class="bg-bgDark">
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-bgDark via-brandDeep/30 to-bgDark backdrop-blur-md p-4">
+    
+    <div class="bg-bgCard/75 backdrop-blur-xl border border-borderBrand w-full max-w-md rounded-3xl p-8 shadow-2xl relative overflow-hidden flex flex-col justify-between space-y-6">
+        
+        <div class="text-center relative z-10 space-y-2">
+            <div class="mx-auto w-16 h-16 bg-gradient-to-tr from-brandDeep to-brandLight rounded-2xl flex items-center justify-center">
+                <span class="text-3xl"></span>
+            </div>
+            <h1 class="text-2xl font-black tracking-tight text-textLight">Brazo inteligente <span class="text-xs bg-brandLight/30 text-brandLight px-2 py-0.5 rounded-full"></span></h1>
+            <p class="text-xs text-textLight opacity-70">Sistema Inteligente Clínico</p>
+        </div>
+
+        <!-- Escaneo -->
+        <div *ngIf="isScanning" class="relative w-44 h-44 mx-auto border-2 border-brandLight/40 rounded-3xl overflow-hidden bg-bgDark/80 flex items-center justify-center">
+            <div class="absolute inset-x-0 h-0.5 bg-brandLight shadow-[0_0_12px_#733456] scan-line"></div>
+            <div class="text-center space-y-1 relative z-10">
+                <span class="text-4xl block animate-pulse"></span>
+                <span class="text-[10px] uppercase tracking-wider text-brandLight font-bold">Analizando Rostro...</span>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div *ngIf="!isScanning" class="space-y-4 relative z-10">
+            <div class="space-y-1.5">
+                <label class="text-[10px] text-textLight uppercase font-bold opacity-60">Usuario</label>
+                <input type="email" [(ngModel)]="email" class="w-full bg-bgDark border border-borderBrand rounded-2xl px-4 py-3 text-sm text-textLight outline-none">
+            </div>
+            <div class="space-y-1.5">
+                <label class="text-[10px] text-textLight uppercase font-bold opacity-60">Contraseña</label>
+                <input type="password" [(ngModel)]="password" class="w-full bg-bgDark border border-borderBrand rounded-2xl px-4 py-3 text-sm text-textLight outline-none">
+            </div>
+        </div>
+
+        <div class="space-y-2.5 relative z-10">
+            <button *ngIf="!isScanning" (click)="handleTraditionalLogin()" class="w-full bg-gradient-to-r from-brandDeep to-brandLight text-white text-xs font-extrabold py-4 rounded-2xl">
+                INICIAR SESIÓN 
+            </button>
+            <button (click)="handleBiometricLogin()" [disabled]="isScanning" class="w-full bg-bgDark/60 border border-borderBrand text-brandLight text-xs font-extrabold py-4 rounded-2xl">
+                {{ isScanning ? 'ESCANEANDO ROSTRO...' : 'ACCESO FACIAL ' }}
+            </button>
+        </div>
+    </div>
+  </div>
+</ion-content>

@@ -1,26 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Ionic App</title>
-
+  <title>AssistiveArm App</title>
   <base href="/" />
-
-  <meta name="color-scheme" content="light dark" />
   <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="format-detection" content="telephone=no" />
-  <meta name="msapplication-tap-highlight" content="no" />
-
   <link rel="icon" type="image/png" href="assets/icon/favicon.png" />
-
-  <!-- add to homescreen for ios -->
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  <!-- Tailwind CSS y configuración de tu diseño -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+      tailwind.config = {
+          theme: {
+              extend: {
+                  colors: {
+                      brandDeep: '#572640',
+                      brandLight: '#733456',
+                      bgDark: '#212126',
+                      bgCard: '#3B4245',
+                      textLight: '#F2F2F2',
+                      borderBrand: 'rgba(115, 52, 86, 0.25)',
+                  }
+              }
+          }
+      }
+  </script>
+  <style>
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+      body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #212126; }
+      .arm-joint { transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      @keyframes face-scan { 0% { top: 0%; opacity: 0.8; } 50% { top: 100%; opacity: 0.8; } 100% { top: 0%; opacity: 0.8; } }
+      .scan-line { animation: face-scan 2.5s infinite linear; }
+  </style>
 </head>
-
 <body>
   <app-root></app-root>
 </body>
-
 </html>

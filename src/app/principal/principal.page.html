@@ -1,0 +1,97 @@
+<ion-content class="bg-bgDark">
+  <main class="max-w-xl w-full mx-auto p-4 space-y-6 pt-8">
+
+    <!-- Simulador del brazo -->
+    <div class="bg-bgCard border border-borderBrand rounded-3xl p-5 shadow-xl relative">
+      <div class="absolute top-4 left-4">
+        <h3 class="text-xs font-bold text-textLight opacity-50">ESTADO</h3>
+        <span class="text-xl font-bold {{ robotColor }}">{{ robotState }}</span>
+      </div>
+      <div class="absolute top-4 right-4 text-xs text-textLight text-right opacity-40">
+        <div>12V DC</div>
+        <div class="text-brandLight font-semibold">{{ voltage }}</div>
+      </div>
+
+      <!-- Brazo SVG -->
+      <div class="w-full h-56 flex items-center justify-center mt-6">
+        <svg viewBox="0 0 300 200" class="w-full h-full max-w-[280px]">
+          <rect x="20" y="170" width="100" height="15" rx="4" class="fill-bgCard stroke-borderBrand" />
+          <line x1="70" y1="170" x2="70" y2="185" class="stroke-bgDark" stroke-width="4" />
+          <circle cx="70" cy="160" r="12" fill="#572640" />
+
+          <g class="arm-joint" style="transform-origin: 70px 160px;" [style.transform]="arm1">
+            <line x1="70" y1="160" x2="70" y2="80" stroke="#572640" stroke-width="10" stroke-linecap="round" />
+            <circle cx="70" cy="80" r="10" fill="#733456" />
+
+            <g class="arm-joint" style="transform-origin: 70px 80px;" [style.transform]="arm2">
+              <line x1="70" y1="80" x2="150" y2="80" stroke="#733456" stroke-width="8" stroke-linecap="round" />
+
+              <g style="transform-origin: 150px 80px;">
+                <path d="M 150 76 Q 165 65 175 75" fill="none" class="stroke-textLight arm-joint" stroke-width="4" [style.transform]="gripT" />
+                <path d="M 150 84 Q 165 95 175 85" fill="none" class="stroke-textLight arm-joint" stroke-width="4" [style.transform]="gripB" />
+
+                <g class="transition-opacity duration-300 {{ glassOp }}">
+                  <path d="M 170 65 L 185 65 L 180 95 L 175 95 Z" fill="#733456" />
+                </g>
+              </g>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Control de Voz -->
+    <div class="bg-bgCard border border-borderBrand rounded-3xl p-5 shadow-xl">
+      <h3 class="text-xs font-bold text-textLight opacity-50 mb-4">CONTROL DE VOZ</h3>
+
+      <!-- Botón micrófono -->
+      <div class="flex flex-col items-center gap-4">
+        <ion-fab-button
+          [color]="micColor"
+          (click)="toggleMic()"
+          class="w-20 h-20"
+          [class.animate-pulse]="voiceStatus === 'listening'">
+          <ion-icon [name]="micIcon" style="font-size: 2rem;"></ion-icon>
+        </ion-fab-button>
+
+        <!-- Mensaje de estado -->
+        <div class="text-center px-4">
+          <p class="text-sm font-semibold"
+            [class.text-green-400]="voiceStatus === 'success'"
+            [class.text-red-400]="voiceStatus === 'error'"
+            [class.text-amber-400]="voiceStatus === 'unknown' || voiceStatus === 'processing'"
+            [class.text-brandLight]="voiceStatus === 'listening'"
+            [class.text-textLight]="voiceStatus === 'idle'">
+            {{ statusMessage }}
+          </p>
+        </div>
+
+        <!-- Comandos disponibles -->
+        <div class="w-full mt-1">
+          <p class="text-xs text-textLight opacity-40 text-center mb-2">Comandos disponibles</p>
+          <div class="flex flex-wrap justify-center gap-2">
+            <span *ngFor="let cmd of ['abrir','cerrar','arriba','abajo','izquierda','derecha','alto']"
+              class="text-xs bg-bgDark border border-borderBrand text-textLight px-2 py-1 rounded-lg opacity-60">
+              {{ cmd }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones Manuales -->
+    <div>
+      <h3 class="text-xs font-bold text-textLight opacity-50 mb-2">CONTROL MANUAL</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <button (click)="simulateVoice('ARRIBA')" class="bg-bgCard text-textLight border border-borderBrand text-xs font-bold py-3.5 px-3 rounded-2xl">Arriba ↑</button>
+        <button (click)="simulateVoice('ABAJO')" class="bg-bgCard text-textLight border border-borderBrand text-xs font-bold py-3.5 px-3 rounded-2xl">Abajo ↓</button>
+        <button (click)="simulateVoice('ABRIR')" class="bg-bgCard text-textLight border border-borderBrand text-xs font-bold py-3.5 px-3 rounded-2xl">Abrir </button>
+        <button (click)="simulateVoice('CERRAR')" class="bg-bgCard text-textLight border border-borderBrand text-xs font-bold py-3.5 px-3 rounded-2xl">Cerrar </button>
+        <button (click)="simulateVoice('IZQUIERDA')" class="bg-bgCard text-textLight border border-borderBrand text-xs font-bold py-3.5 px-3 rounded-2xl">Izq ←</button>
+        <button (click)="simulateVoice('DERECHA')" class="bg-bgCard text-textLight border border-borderBrand text-xs font-bold py-3.5 px-3 rounded-2xl">Der →</button>
+        <button (click)="simulateVoice('ALTO')" class="bg-bgCard text-red-400 border border-red-400 text-xs font-bold py-3.5 px-3 rounded-2xl col-span-2">⛔ ALTO</button>
+      </div>
+    </div>
+
+  </main>
+</ion-content>

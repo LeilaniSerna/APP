@@ -1,0 +1,21 @@
+<ion-content class="bg-bgDark">
+  <div class="max-w-xl mx-auto p-4 pt-8">
+    <div class="bg-bgCard border border-borderBrand p-6 rounded-3xl shadow-xl space-y-6">
+        <h2 class="text-lg font-bold text-textLight mb-2">Seguridad y Dispositivo</h2>
+        
+        <div class="space-y-3">
+            <div class="flex justify-between items-center text-sm font-semibold text-textLight">
+                <span class="opacity-80">Presión de Agarre (12V)</span>
+                <span class="text-brandLight font-bold bg-brandDeep/20 border border-brandLight/30 px-2.5 py-0.5 rounded-lg">{{ forceLabel }}</span>
+            </div>
+            <input type="range" min="15" max="100" [(ngModel)]="forceValue" class="w-full h-2 bg-bgDark rounded-lg appearance-none accent-brandLight">
+        </div>
+
+        <hr class="border-borderBrand/40">
+
+        <button (click)="handleLogout()" class="w-full bg-bgDark text-brandLight border border-borderBrand py-3 rounded-2xl text-xs font-bold">
+            Cerrar Sesión del Portal Médico 🔒
+        </button>
+    </div>
+  </div>
+</ion-content>
