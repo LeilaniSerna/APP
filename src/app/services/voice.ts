@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 // IP del ESP32 en la red local — cambia esto cuando tengas la IP real
-const ESP32_URL = 'http://192.168.1.100';
+const ESP32_URL = '192.168.120.43';
 
 // Endpoint del backend en Vercel
 const VERCEL_URL = 'https://brazo-backend.vercel.app/api/comando';
