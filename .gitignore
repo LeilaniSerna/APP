@@ -30,7 +30,7 @@ log.txt
 /bazel-out
 
 # Node
-/node_modules
+node_modules/
 npm-debug.log
 yarn-error.log
 
@@ -70,3 +70,8 @@ testem.log
 Thumbs.db
 .aider*
 .vercel
+
+# Environment variables
+.env
+backend/.env
+
