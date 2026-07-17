@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const stringSimilarity = require('string-similarity');
@@ -7,8 +8,9 @@ const stringSimilarity = require('string-similarity');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware para parsear JSON en las peticiones
+// Middleware para parsear JSON y habilitar CORS
 app.use(express.json());
+app.use(cors());
 
 // Conexión a MongoDB (controlar error de manera que no detenga el arranque local si no hay .env aún)
 connectDB().catch((err) => {
