@@ -5,8 +5,8 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 // IP del ESP32 en la red local — cambia esto cuando tengas la IP real
 const ESP32_URL = '192.168.120.43';
 
-// Endpoint del backend en Vercel
-const VERCEL_URL = 'https://brazo-backend.vercel.app/api/comando';
+// Endpoint del backend en Vercel (ruta relativa en el mismo despliegue)
+const VERCEL_URL = '/api/comando';
 
 export type VoiceStatus =
   | 'idle'
