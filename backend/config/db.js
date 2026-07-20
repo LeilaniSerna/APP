@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
 
-// Declarar variable para almacenar la promesa de conexión y reutilizarla
+// Declarar variable para almacenar la promesa de conexión y reutilizarla en Serverless
 let cachedPromise = null;
 
 const connectDB = async () => {
-  // Si la conexión ya está activa (readyState 1 = conectado, 2 = conectando)
-  if (mongoose.connection.readyState >= 1) {
-    console.log('=> Reutilizando conexión existente a MongoDB');
+  // Solo reutilizar inmediatamente si la conexión está 100% LISTA (readyState 1 = conectado)
+  if (mongoose.connection.readyState === 1) {
     return mongoose.connection;
   }
 
@@ -16,14 +15,10 @@ const connectDB = async () => {
     throw new Error('MONGODB_URI es requerida para conectar a la base de datos');
   }
 
-  // Si no hay promesa de conexión en cache, crear una nueva
+  // Si no hay promesa de conexión en caché, crear una nueva
   if (!cachedPromise) {
-    const opts = {
-      bufferCommands: false, // Desactivar el almacenamiento en búfer si la conexión se cae
-    };
-
     console.log('=> Iniciando nueva conexión a MongoDB...');
-    cachedPromise = mongoose.connect(process.env.MONGODB_URI, opts)
+    cachedPromise = mongoose.connect(process.env.MONGODB_URI)
       .then((mongooseInstance) => {
         console.log('=> Conexión a MongoDB establecida exitosamente');
         return mongooseInstance;
@@ -35,7 +30,7 @@ const connectDB = async () => {
       });
   }
 
-  return cachedPromise;
+  return await cachedPromise;
 };
 
 module.exports = connectDB;
