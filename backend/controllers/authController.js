@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const connectDB = require('../config/db');
 
 // Función helper para generar JWT con expiración de 7 días
 const generarToken = (user) => {
@@ -17,6 +18,9 @@ const generarToken = (user) => {
 // Registro de usuario
 exports.register = async (req, res) => {
   try {
+    // Asegurar la conexión activa a MongoDB Atlas en entornos Serverless
+    await connectDB();
+
     const { email, password, nombre, rol } = req.body;
 
     // Validación de campos requeridos básica
@@ -65,13 +69,17 @@ exports.register = async (req, res) => {
       return res.status(400).json({ error: mensajes.join(', ') });
     }
     
-    return res.status(500).json({ error: 'Error interno del servidor al procesar el registro' });
+    const mensajeError = error.message || 'Error interno del servidor al procesar el registro';
+    return res.status(500).json({ error: mensajeError });
   }
 };
 
 // Inicio de sesión de usuario
 exports.login = async (req, res) => {
   try {
+    // Asegurar la conexión activa a MongoDB Atlas en entornos Serverless
+    await connectDB();
+
     const { email, password } = req.body;
 
     // Validación básica de campos requeridos
@@ -107,6 +115,7 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error('Error en el controlador de inicio de sesión:', error);
-    return res.status(500).json({ error: 'Error interno del servidor al procesar el inicio de sesión' });
+    const mensajeError = error.message || 'Error interno del servidor al procesar el inicio de sesión';
+    return res.status(500).json({ error: mensajeError });
   }
 };

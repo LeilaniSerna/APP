@@ -32,7 +32,10 @@ export class LoginPage {
       },
       error: (err) => {
         console.error('Error de autenticación:', err);
-        const errorMsg = err.error?.error || 'Error al conectar con el servidor de base de datos';
+        const rawError = err.error?.error;
+        const errorMsg = typeof rawError === 'string' 
+          ? rawError 
+          : (err.error?.message || err.message || 'Error al conectar con el servidor de base de datos');
         alert(errorMsg);
       }
     });
