@@ -1,20 +1,36 @@
 import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { VoiceService, VoiceStatus } from '../services/voice';
 import { addIcons } from 'ionicons';
-import { mic, micOutline } from 'ionicons/icons';
+import { mic, micOutline, optionsOutline } from 'ionicons/icons';
 import {
   IonContent,
-  IonFabButton,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+  IonButton,
   IonIcon,
+  IonFabButton,
 } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-home',
   templateUrl: './principal.page.html',
   standalone: true,
-  imports: [CommonModule, IonContent, IonFabButton, IonIcon],
+  imports: [
+    CommonModule,
+    IonContent,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonButtons,
+    IonButton,
+    IonIcon,
+    IonFabButton
+  ],
 })
 export class HomePage implements OnDestroy {
   robotState = 'EN REPOSO';
@@ -32,8 +48,8 @@ export class HomePage implements OnDestroy {
 
   private subs = new Subscription();
 
-  constructor(public voiceService: VoiceService) {
-    addIcons({ mic, micOutline });
+  constructor(public voiceService: VoiceService, private router: Router) {
+    addIcons({ mic, micOutline, optionsOutline });
     this.subs.add(
       this.voiceService.status$.subscribe((s) => (this.voiceStatus = s))
     );
@@ -49,6 +65,11 @@ export class HomePage implements OnDestroy {
 
   ngOnDestroy() {
     this.subs.unsubscribe();
+  }
+
+  // Navegación hacia la página de Ajustes y Perfil
+  goToConfiguracion() {
+    this.router.navigate(['/configuracion']);
   }
 
   toggleMic() {

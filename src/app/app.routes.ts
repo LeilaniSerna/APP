@@ -9,28 +9,21 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    loadComponent: () => import('./login/login.page').then( m => m.LoginPage),
+    loadComponent: () => import('./login/login.page').then(m => m.LoginPage),
     canActivate: [redirectIfAuthenticatedGuard]
   },
   {
-    path: 'tabs',
-    loadComponent: () => import('./tabs/tabs.page').then( m => m.TabsPage),
-    canActivate: [authGuard],
-    children: [
-      {
-        path: 'home',
-        // OJO: Aquí es donde apuntamos a tu carpeta principal
-        loadComponent: () => import('./principal/principal.page').then(m => m.HomePage) 
-      },
-      {
-        path: 'configuracion',
-        loadComponent: () => import('./configuracion/configuracion.page').then(m => m.ConfiguracionPage)
-      },
-      {
-        path: '',
-        redirectTo: 'home',
-        pathMatch: 'full'
-      }
-    ]
+    path: 'home',
+    loadComponent: () => import('./principal/principal.page').then(m => m.HomePage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'configuracion',
+    loadComponent: () => import('./configuracion/configuracion.page').then(m => m.ConfiguracionPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: '**',
+    redirectTo: 'home'
   }
 ];

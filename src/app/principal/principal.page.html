@@ -1,5 +1,16 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="bg-bgDark border-b border-borderBrand/30 text-textLight px-2">
+    <ion-title class="text-sm font-black tracking-wider text-textLight">A-ARM BRAZO ROBÓTICO</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="goToConfiguracion()" class="text-brandLight">
+        <ion-icon name="options-outline" style="font-size: 1.4rem;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
 <ion-content class="bg-bgDark">
-  <main class="max-w-xl w-full mx-auto p-4 space-y-6 pt-8">
+  <main class="max-w-xl w-full mx-auto p-4 space-y-6 pt-4 pb-12">
 
     <!-- Simulador del brazo -->
     <div class="bg-bgCard border border-borderBrand rounded-3xl p-5 shadow-xl relative">
