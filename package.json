@@ -29,11 +29,13 @@
     "@ionic/angular": "^8.0.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "ionicons": "^7.0.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.8.0",
     "rxjs": "~7.8.0",
+    "string-similarity": "^4.0.4",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },
