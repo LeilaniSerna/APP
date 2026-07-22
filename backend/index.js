@@ -9,6 +9,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const routineRoutes = require('./routes/routineRoutes');
 const stringSimilarity = require('string-similarity');
 
 const app = express();
@@ -37,8 +38,9 @@ app.use(async (req, res, next) => {
   next(); // Si ya está conectado o se acaba de conectar, continúa a la ruta que el usuario pidió
 });
 
-// Rutas de autenticación
+// Rutas de autenticación y rutinas de usuario
 app.use('/api/auth', authRoutes);
+app.use('/api/routines', routineRoutes);
 
 // Comandos esperados por el ESP32 para controlar el brazo robótico
 const COMANDOS_VALIDOS = [
