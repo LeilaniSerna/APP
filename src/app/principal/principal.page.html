@@ -121,14 +121,9 @@
     <!-- VISTA: RUTINAS -->
     <div *ngIf="currentView === 'rutinas'" class="fade-in space-y-4">
       
-      <div class="bg-cardBgDark p-4 rounded-xl border border-accentWine/30 shadow-[0_0_15px_rgba(168,50,80,0.1)] flex justify-between items-center">
-        <div>
-          <h2 class="text-lg font-bold text-white mb-1">Gestor de Rutinas</h2>
-          <p class="text-xs text-textMuted">Ejecuta secuencias complejas automatizadas con un solo toque.</p>
-        </div>
-        <button (click)="abrirModalCrear()" class="bg-accentWine text-white p-3 rounded-xl hover:bg-pink-700 transition shadow-lg flex items-center justify-center">
-          <i class="fas fa-plus"></i>
-        </button>
+      <div class="bg-cardBgDark p-4 rounded-xl border border-accentWine/30 shadow-[0_0_15px_rgba(168,50,80,0.1)]">
+        <h2 class="text-lg font-bold text-white mb-1">Gestor de Rutinas</h2>
+        <p class="text-xs text-textMuted">Ejecuta secuencias complejas automatizadas con un solo toque.</p>
       </div>
 
       <!-- Iteración Dinámica de Rutinas cargadas desde MongoDB Atlas -->
@@ -179,7 +174,7 @@
         </div>
       </div>
 
-      <!-- Tarjeta Crear Nueva Secuencia -->
+      <!-- Tarjeta Crear Nueva Secuencia (Única forma de abrir el modal) -->
       <div (click)="abrirModalCrear()" class="border-2 border-dashed border-gray-800 hover:border-accentWine/50 rounded-2xl p-6 text-center cursor-pointer transition-colors group">
         <p class="text-sm font-bold text-textMuted group-hover:text-accentWine transition-colors flex items-center justify-center gap-2">
           <i class="fas fa-plus"></i> Crear Nueva Secuencia
@@ -189,33 +184,24 @@
     </div>
 
   </main>
-
-  <!-- Botón Flotante FAB en la parte inferior derecha de la vista RUTINAS -->
-  <ion-fab *ngIf="currentView === 'rutinas'" slot="fixed" vertical="bottom" horizontal="end" class="mb-6 mr-4">
-    <ion-fab-button (click)="abrirModalCrear()" class="bg-accentWine text-white shadow-2xl">
-      <i class="fas fa-plus text-lg"></i>
-    </ion-fab-button>
-  </ion-fab>
 </ion-content>
 
 <!-- MODAL DE CREACIÓN DE NUEVA RUTINA -->
 <ion-modal [isOpen]="isModalOpen" (didDismiss)="cerrarModal()">
   <ng-template>
-    <div class="bg-appBg min-h-full p-5 text-white flex flex-col justify-between space-y-6">
-      
-      <!-- Cabecera del Modal -->
-      <div class="flex justify-between items-center border-b border-gray-800 pb-4">
-        <div>
-          <h2 class="text-lg font-extrabold tracking-wider text-white">Crear Nueva Rutina</h2>
-          <p class="text-xs text-textMuted">Diseña una secuencia personalizada para tu brazo</p>
-        </div>
-        <button (click)="cerrarModal()" class="text-textMuted hover:text-white p-2 text-lg">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
+    <ion-header class="ion-no-border">
+      <ion-toolbar class="bg-appBg border-b border-gray-800 text-white px-4">
+        <ion-title class="text-base font-extrabold tracking-wider text-white">Crear Nueva Rutina</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarModal()" class="text-textMuted hover:text-white">
+            <i class="fas fa-times text-lg"></i>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
 
-      <!-- Formulario del Modal -->
-      <div class="space-y-4 flex-1">
+    <ion-content class="bg-appBg ion-padding">
+      <div class="space-y-4 max-w-xl mx-auto pb-6">
         
         <!-- Campo: Título -->
         <div class="space-y-1.5">
@@ -278,9 +264,11 @@
         </div>
 
       </div>
+    </ion-content>
 
-      <!-- Botones de Acción -->
-      <div class="grid grid-cols-2 gap-3 pt-4 border-t border-gray-800">
+    <!-- Pie de página del modal con los botones de acción destacados -->
+    <ion-footer class="ion-no-border bg-appBg border-t border-gray-800 p-4">
+      <div class="grid grid-cols-2 gap-3 max-w-xl mx-auto">
         <button
           (click)="cerrarModal()"
           class="bg-cardBgDark hover:bg-gray-700 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition">
@@ -294,8 +282,7 @@
           <span *ngIf="guardandoRutina"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
         </button>
       </div>
-
-    </div>
+    </ion-footer>
   </ng-template>
 </ion-modal>
 
