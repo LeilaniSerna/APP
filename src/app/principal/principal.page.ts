@@ -1,8 +1,9 @@
-import { Component, OnDestroy, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, AfterViewInit, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { VoiceService, VoiceStatus } from '../services/voice';
+import { RoutineService, Routine } from '../services/routine.service';
 import { addIcons } from 'ionicons';
 import { mic, micOutline, optionsOutline } from 'ionicons/icons';
 import {
@@ -34,7 +35,7 @@ declare const Chart: any;
     IonFabButton
   ],
 })
-export class HomePage implements OnDestroy, AfterViewInit {
+export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('telemetriaCanvas') telemetriaCanvas!: ElementRef<HTMLCanvasElement>;
 
   // Control de Vistas (Monitor vs Rutinas)
@@ -61,18 +62,13 @@ export class HomePage implements OnDestroy, AfterViewInit {
   consumoData = [0.2, 0.3, 0.2, 0.4, 0.3, 0.2, 0.2];
   private telemetriaInterval: any = null;
 
-  // Gestor de Rutinas (Mocks)
+  // Gestor de Rutinas desde MongoDB Atlas
+  rutinas: Routine[] = [];
   ejecutandoRutina = false;
-  pasosRutina1 = ['abrir', 'derecha', 'bajar', 'cerrar', 'arriba', 'izquierda'];
-  pasosRutina2 = ['bajar', 'cerrar', 'arriba', 'derecha', 'abajo', 'abrir'];
-  
-  pasoActivoRutina1 = -1;
-  pasoActivoRutina2 = -1;
-  pasoCompletadoRutina1: boolean[] = [false, false, false, false, false, false];
-  pasoCompletadoRutina2: boolean[] = [false, false, false, false, false, false];
-  
-  progresoRutina1 = 0;
-  progresoRutina2 = 0;
+  rutinaEnEjecucionId: string | null = null;
+  pasoActivoIndex = -1;
+  pasosCompletados: boolean[] = [];
+  progresoActual = 0;
 
   // Toast Notificaciones
   showToast = false;
@@ -80,7 +76,11 @@ export class HomePage implements OnDestroy, AfterViewInit {
 
   private subs = new Subscription();
 
-  constructor(public voiceService: VoiceService, private router: Router) {
+  constructor(
+    public voiceService: VoiceService,
+    private routineService: RoutineService,
+    private router: Router
+  ) {
     addIcons({ mic, micOutline, optionsOutline });
 
     this.subs.add(
@@ -94,6 +94,10 @@ export class HomePage implements OnDestroy, AfterViewInit {
         if (cmd) this.applyCommand(cmd);
       })
     );
+  }
+
+  ngOnInit() {
+    this.cargarRutinas();
   }
 
   ngAfterViewInit() {
@@ -110,9 +114,39 @@ export class HomePage implements OnDestroy, AfterViewInit {
     }
   }
 
+  // Cargar las rutinas dinámicas del usuario desde MongoDB Atlas
+  cargarRutinas() {
+    this.routineService.getRoutines().subscribe({
+      next: (data) => {
+        this.rutinas = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar rutinas desde el backend:', err);
+        // Fallback por defecto si no hay conexión temporal
+        this.rutinas = [
+          {
+            _id: 'default-1',
+            titulo: 'Acercar Medicamento',
+            categoria: 'ASISTENCIA MÉDICA',
+            comandos: ['abrir', 'derecha', 'bajar', 'cerrar', 'arriba', 'izquierda']
+          },
+          {
+            _id: 'default-2',
+            titulo: 'Ensamblaje de Pieza',
+            categoria: 'USO INDUSTRIAL',
+            comandos: ['bajar', 'cerrar', 'arriba', 'derecha', 'abajo', 'abrir']
+          }
+        ];
+      }
+    });
+  }
+
   // --- NAVEGACIÓN ---
   switchView(view: 'monitor' | 'rutinas') {
     this.currentView = view;
+    if (view === 'rutinas' && this.rutinas.length === 0) {
+      this.cargarRutinas();
+    }
     if (view === 'monitor') {
       setTimeout(() => {
         if (!this.telemetriaChart) {
@@ -195,59 +229,68 @@ export class HomePage implements OnDestroy, AfterViewInit {
     }, 2500);
   }
 
-  // --- GESTOR DE RUTINAS ---
-  async ejecutarRutina(idRutina: 'rutina1' | 'rutina2', pasos: string[]) {
+  // --- GESTOR DE RUTINAS DINÁMICO ---
+  async ejecutarRutina(rutina: Routine) {
     if (this.ejecutandoRutina) {
       this.mostrarToast('Ya hay una rutina en ejecución');
       return;
     }
 
     this.ejecutandoRutina = true;
+    this.rutinaEnEjecucionId = rutina._id || rutina.titulo;
+    this.pasosCompletados = new Array(rutina.comandos.length).fill(false);
+    this.progresoActual = 0;
 
-    if (idRutina === 'rutina1') {
-      this.progresoRutina1 = 0;
-      this.pasoCompletadoRutina1 = [false, false, false, false, false, false];
-    } else {
-      this.progresoRutina2 = 0;
-      this.pasoCompletadoRutina2 = [false, false, false, false, false, false];
-    }
-
-    for (let i = 0; i < pasos.length; i++) {
-      const comando = pasos[i];
-
-      if (idRutina === 'rutina1') {
-        this.pasoActivoRutina1 = i;
-        this.progresoRutina1 = ((i + 1) / pasos.length) * 100;
-      } else {
-        this.pasoActivoRutina2 = i;
-        this.progresoRutina2 = ((i + 1) / pasos.length) * 100;
-      }
+    for (let i = 0; i < rutina.comandos.length; i++) {
+      const comando = rutina.comandos[i];
+      this.pasoActivoIndex = i;
+      this.progresoActual = ((i + 1) / rutina.comandos.length) * 100;
 
       this.simulateVoice(comando.toUpperCase());
 
       await new Promise((r) => setTimeout(r, 1500));
 
-      if (idRutina === 'rutina1') {
-        this.pasoCompletadoRutina1[i] = true;
-      } else {
-        this.pasoCompletadoRutina2[i] = true;
-      }
+      this.pasosCompletados[i] = true;
     }
 
     this.mostrarToast('Rutina completada con éxito');
     this.ejecutandoRutina = false;
-    this.pasoActivoRutina1 = -1;
-    this.pasoActivoRutina2 = -1;
+    this.rutinaEnEjecucionId = null;
+    this.pasoActivoIndex = -1;
 
     setTimeout(() => {
-      if (idRutina === 'rutina1') {
-        this.progresoRutina1 = 0;
-        this.pasoCompletadoRutina1 = [false, false, false, false, false, false];
-      } else {
-        this.progresoRutina2 = 0;
-        this.pasoCompletadoRutina2 = [false, false, false, false, false, false];
-      }
+      this.progresoActual = 0;
+      this.pasosCompletados = [];
     }, 3000);
+  }
+
+  // Auxiliar para determinar la clase de la categoría
+  getCategoriaBadgeClass(categoria: string): string {
+    const cat = (categoria || '').toUpperCase();
+    if (cat.includes('MÉDICA') || cat.includes('MEDICA')) {
+      return 'bg-blue-500/20 text-blue-400';
+    } else if (cat.includes('INDUSTRIAL')) {
+      return 'bg-yellow-500/20 text-yellow-500';
+    }
+    return 'bg-accentWine/20 text-accentWine';
+  }
+
+  // Auxiliar para determinar la clase del botón de ejecución
+  getBotonEjecutarClass(categoria: string): string {
+    const cat = (categoria || '').toUpperCase();
+    if (cat.includes('INDUSTRIAL')) {
+      return 'bg-gray-700 hover:bg-gray-600';
+    }
+    return 'bg-accentWine hover:bg-pink-700';
+  }
+
+  // Auxiliar para determinar el color de la barra de progreso
+  getProgresoColorClass(categoria: string): string {
+    const cat = (categoria || '').toUpperCase();
+    if (cat.includes('INDUSTRIAL')) {
+      return 'bg-yellow-500';
+    }
+    return 'bg-accentWine';
   }
 
   // --- CONTROL DE VOZ Y SIMULADOR DEL BRAZO ---

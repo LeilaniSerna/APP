@@ -126,30 +126,37 @@
         <p class="text-xs text-textMuted">Ejecuta secuencias complejas automatizadas con un solo toque.</p>
       </div>
 
-      <!-- Rutina 1: Asistencia Médica -->
-      <div class="bg-cardBg rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
+      <!-- Iteración Dinámica de Rutinas cargadas desde MongoDB Atlas -->
+      <div *ngFor="let rutina of rutinas" class="bg-cardBg rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
         <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-cardBgDark">
           <div>
-            <span class="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-1 rounded-md font-bold uppercase">Asistencia Médica</span>
-            <h3 class="font-bold text-white mt-1">Acercar Medicamento</h3>
+            <span class="text-[10px] px-2 py-1 rounded-md font-bold uppercase" [ngClass]="getCategoriaBadgeClass(rutina.categoria)">
+              {{ rutina.categoria }}
+            </span>
+            <h3 class="font-bold text-white mt-1">{{ rutina.titulo }}</h3>
           </div>
           <button
-            (click)="ejecutarRutina('rutina1', pasosRutina1)"
+            (click)="ejecutarRutina(rutina)"
             [disabled]="ejecutandoRutina"
-            class="bg-accentWine hover:bg-pink-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg transition flex items-center gap-1.5">
-            <span *ngIf="!ejecutandoRutina || pasoActivoRutina1 === -1">Ejecutar <i class="fas fa-play ml-1"></i></span>
-            <span *ngIf="ejecutandoRutina && pasoActivoRutina1 !== -1"><i class="fas fa-spinner fa-spin mr-1"></i> En curso...</span>
+            class="text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg transition flex items-center gap-1.5 disabled:opacity-50"
+            [ngClass]="getBotonEjecutarClass(rutina.categoria)">
+            <span *ngIf="!ejecutandoRutina || rutinaEnEjecucionId !== (rutina._id || rutina.titulo)">
+              Ejecutar <i class="fas fa-play ml-1"></i>
+            </span>
+            <span *ngIf="ejecutandoRutina && rutinaEnEjecucionId === (rutina._id || rutina.titulo)">
+              <i class="fas fa-spinner fa-spin mr-1"></i> En curso...
+            </span>
           </button>
         </div>
         <div class="p-4">
           <p class="text-xs text-textMuted mb-3">Secuencia de movimientos:</p>
           <div class="flex flex-wrap gap-2">
             <span
-              *ngFor="let paso of pasosRutina1; let i = index"
+              *ngFor="let paso of rutina.comandos; let i = index"
               [ngClass]="{
-                'bg-white text-black shadow-[0_0_10px_white]': pasoActivoRutina1 === i,
-                'bg-accentWine text-white': pasoCompletadoRutina1[i] && pasoActivoRutina1 !== i,
-                'bg-gray-800 text-textMuted border border-gray-700': pasoActivoRutina1 !== i && !pasoCompletadoRutina1[i]
+                'bg-white text-black shadow-[0_0_10px_white]': rutinaEnEjecucionId === (rutina._id || rutina.titulo) && pasoActivoIndex === i,
+                'bg-accentWine text-white': rutinaEnEjecucionId === (rutina._id || rutina.titulo) && pasosCompletados[i] && pasoActivoIndex !== i,
+                'bg-gray-800 text-textMuted border border-gray-700': rutinaEnEjecucionId !== (rutina._id || rutina.titulo) || (!pasosCompletados[i] && pasoActivoIndex !== i)
               }"
               class="text-[10px] px-2 py-1 rounded-md uppercase font-bold transition-colors">
               {{ paso }}
@@ -158,44 +165,11 @@
 
           <!-- Barra de progreso -->
           <div class="w-full bg-gray-800 rounded-full h-1.5 mt-4 overflow-hidden">
-            <div class="bg-accentWine h-1.5 rounded-full transition-all duration-300" [style.width.%]="progresoRutina1"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Rutina 2: Uso Industrial -->
-      <div class="bg-cardBg rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
-        <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-cardBgDark">
-          <div>
-            <span class="text-[10px] bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded-md font-bold uppercase">Uso Industrial</span>
-            <h3 class="font-bold text-white mt-1">Ensamblaje de Pieza</h3>
-          </div>
-          <button
-            (click)="ejecutarRutina('rutina2', pasosRutina2)"
-            [disabled]="ejecutandoRutina"
-            class="bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg transition flex items-center gap-1.5">
-            <span *ngIf="!ejecutandoRutina || pasoActivoRutina2 === -1">Ejecutar <i class="fas fa-play ml-1"></i></span>
-            <span *ngIf="ejecutandoRutina && pasoActivoRutina2 !== -1"><i class="fas fa-spinner fa-spin mr-1"></i> En curso...</span>
-          </button>
-        </div>
-        <div class="p-4">
-          <p class="text-xs text-textMuted mb-3">Secuencia de movimientos:</p>
-          <div class="flex flex-wrap gap-2">
-            <span
-              *ngFor="let paso of pasosRutina2; let i = index"
-              [ngClass]="{
-                'bg-white text-black shadow-[0_0_10px_white]': pasoActivoRutina2 === i,
-                'bg-yellow-500 text-black': pasoCompletadoRutina2[i] && pasoActivoRutina2 !== i,
-                'bg-gray-800 text-textMuted border border-gray-700': pasoActivoRutina2 !== i && !pasoCompletadoRutina2[i]
-              }"
-              class="text-[10px] px-2 py-1 rounded-md uppercase font-bold transition-colors">
-              {{ paso }}
-            </span>
-          </div>
-
-          <!-- Barra de progreso -->
-          <div class="w-full bg-gray-800 rounded-full h-1.5 mt-4 overflow-hidden">
-            <div class="bg-yellow-500 h-1.5 rounded-full transition-all duration-300" [style.width.%]="progresoRutina2"></div>
+            <div
+              class="h-1.5 rounded-full transition-all duration-300"
+              [ngClass]="getProgresoColorClass(rutina.categoria)"
+              [style.width.%]="rutinaEnEjecucionId === (rutina._id || rutina.titulo) ? progresoActual : 0">
+            </div>
           </div>
         </div>
       </div>
