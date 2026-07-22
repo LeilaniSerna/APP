@@ -1,108 +1,222 @@
 <ion-header class="ion-no-border">
-  <ion-toolbar class="bg-bgDark border-b border-borderBrand/30 text-textLight px-2">
-    <ion-title class="text-sm font-black tracking-wider text-textLight">A-ARM BRAZO ROBÓTICO</ion-title>
+  <ion-toolbar class="bg-appBg border-b border-gray-800 text-white px-2">
+    <ion-title class="text-base font-extrabold tracking-wider uppercase text-white">A-ARM BRAZO ROBÓTICO</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="goToConfiguracion()" class="text-brandLight">
-        <ion-icon name="options-outline" style="font-size: 1.4rem;"></ion-icon>
+      <ion-button (click)="goToConfiguracion()" class="text-textMuted hover:text-white transition">
+        <i class="fa-solid fa-user text-lg"></i>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="bg-bgDark">
-  <main class="max-w-xl w-full mx-auto p-4 space-y-6 pt-4 pb-12">
+<nav class="flex border-b border-gray-800 bg-appBg sticky top-0 z-10">
+  <button (click)="switchView('monitor')" [class.active]="currentView === 'monitor'" class="tab-btn flex-1 py-3 text-sm font-semibold text-textMuted transition">
+    MONITOR
+  </button>
+  <button (click)="switchView('rutinas')" [class.active]="currentView === 'rutinas'" class="tab-btn flex-1 py-3 text-sm font-semibold text-textMuted transition">
+    RUTINAS
+  </button>
+</nav>
 
-    <!-- Simulador del brazo -->
-    <div class="bg-bgCard border border-borderBrand rounded-3xl p-5 shadow-xl relative">
-      <div class="absolute top-4 left-4">
-        <h3 class="text-xs font-bold text-textLight opacity-50">ESTADO</h3>
-        <span class="text-xl font-bold {{ robotColor }}">{{ robotState }}</span>
-      </div>
-      <div class="absolute top-4 right-4 text-xs text-textLight text-right opacity-40">
-        <div>12V DC</div>
-        <div class="text-brandLight font-semibold">{{ voltage }}</div>
-      </div>
+<ion-content class="bg-appBg">
+  <main class="max-w-xl w-full mx-auto p-4 space-y-4 pb-24">
 
-      <!-- Brazo SVG -->
-      <div class="w-full h-56 flex items-center justify-center mt-6">
-        <svg viewBox="0 0 300 200" class="w-full h-full max-w-[280px]">
-          <rect x="20" y="170" width="100" height="15" rx="4" class="fill-bgCard stroke-borderBrand" />
-          <line x1="70" y1="170" x2="70" y2="185" class="stroke-bgDark" stroke-width="4" />
-          <circle cx="70" cy="160" r="12" fill="#572640" />
+    <!-- VISTA: MONITOR -->
+    <div *ngIf="currentView === 'monitor'" class="fade-in space-y-4">
 
-          <g class="arm-joint" style="transform-origin: 70px 160px;" [style.transform]="arm1">
-            <line x1="70" y1="160" x2="70" y2="80" stroke="#572640" stroke-width="10" stroke-linecap="round" />
-            <circle cx="70" cy="80" r="10" fill="#733456" />
+      <!-- Tarjeta de Estado del Brazo -->
+      <div class="bg-cardBg rounded-2xl p-5 relative overflow-hidden shadow-lg border border-gray-800/50">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h3 class="text-xs font-bold text-textMuted uppercase">ESTADO</h3>
+            <h2 class="text-accentWine text-xl font-bold tracking-widest uppercase" [ngClass]="robotColor">{{ robotState }}</h2>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-bold text-gray-400">12V DC</p>
+            <p class="text-[10px] text-accentWine font-semibold">{{ voltage }}</p>
+          </div>
+        </div>
 
-            <g class="arm-joint" style="transform-origin: 70px 80px;" [style.transform]="arm2">
-              <line x1="70" y1="80" x2="150" y2="80" stroke="#733456" stroke-width="8" stroke-linecap="round" />
+        <!-- Simulación de SVG del brazo -->
+        <div class="h-36 flex items-center justify-center relative">
+          <svg viewBox="0 0 300 200" class="w-full h-full max-w-[280px]">
+            <rect x="20" y="170" width="100" height="15" rx="4" fill="#232529" stroke="#374151" />
+            <line x1="70" y1="170" x2="70" y2="185" stroke="#121212" stroke-width="4" />
+            <circle cx="70" cy="160" r="12" fill="#a83250" />
 
-              <g style="transform-origin: 150px 80px;">
-                <path d="M 150 76 Q 165 65 175 75" fill="none" class="stroke-textLight arm-joint" stroke-width="4" [style.transform]="gripT" />
-                <path d="M 150 84 Q 165 95 175 85" fill="none" class="stroke-textLight arm-joint" stroke-width="4" [style.transform]="gripB" />
+            <g class="arm-joint" style="transform-origin: 70px 160px;" [style.transform]="arm1">
+              <line x1="70" y1="160" x2="70" y2="80" stroke="#a83250" stroke-width="10" stroke-linecap="round" />
+              <circle cx="70" cy="80" r="10" fill="#ffffff" />
 
-                <g class="transition-opacity duration-300 {{ glassOp }}">
-                  <path d="M 170 65 L 185 65 L 180 95 L 175 95 Z" fill="#733456" />
+              <g class="arm-joint" style="transform-origin: 70px 80px;" [style.transform]="arm2">
+                <line x1="70" y1="80" x2="150" y2="80" stroke="#a83250" stroke-width="8" stroke-linecap="round" />
+                <circle cx="70" cy="80" r="8" fill="#ffffff" />
+
+                <g style="transform-origin: 150px 80px;">
+                  <path d="M 150 76 Q 165 65 175 75" fill="none" stroke="#ffffff" class="arm-joint" stroke-width="4" [style.transform]="gripT" />
+                  <path d="M 150 84 Q 165 95 175 85" fill="none" stroke="#ffffff" class="arm-joint" stroke-width="4" [style.transform]="gripB" />
+
+                  <g class="transition-opacity duration-300 {{ glassOp }}">
+                    <path d="M 170 65 L 185 65 L 180 95 L 175 95 Z" fill="#a83250" />
+                  </g>
                 </g>
               </g>
             </g>
-          </g>
-        </svg>
-      </div>
-    </div>
-
-    <!-- Control de Voz -->
-    <div class="bg-bgCard border border-borderBrand rounded-3xl p-5 shadow-xl">
-      <h3 class="text-xs font-bold text-textLight opacity-50 mb-4">CONTROL DE VOZ</h3>
-
-      <!-- Botón micrófono -->
-      <div class="flex flex-col items-center gap-4">
-        <ion-fab-button
-          [color]="micColor"
-          (click)="toggleMic()"
-          class="w-20 h-20"
-          [class.animate-pulse]="voiceStatus === 'listening'">
-          <ion-icon [name]="micIcon" style="font-size: 2rem;"></ion-icon>
-        </ion-fab-button>
-
-        <!-- Mensaje de estado -->
-        <div class="text-center px-4">
-          <p class="text-sm font-semibold"
-            [class.text-green-400]="voiceStatus === 'success'"
-            [class.text-red-400]="voiceStatus === 'error'"
-            [class.text-amber-400]="voiceStatus === 'unknown' || voiceStatus === 'processing'"
-            [class.text-brandLight]="voiceStatus === 'listening'"
-            [class.text-textLight]="voiceStatus === 'idle'">
-            {{ statusMessage }}
-          </p>
+          </svg>
         </div>
+      </div>
 
-        <!-- Comandos disponibles -->
-        <div class="w-full mt-1">
-          <p class="text-xs text-textLight opacity-40 text-center mb-2">Comandos disponibles</p>
-          <div class="flex flex-wrap justify-center gap-2">
-            <span *ngFor="let cmd of ['abrir','cerrar','arriba','abajo','izquierda','derecha','alto']"
-              class="text-xs bg-bgDark border border-borderBrand text-textLight px-2 py-1 rounded-lg opacity-60">
-              {{ cmd }}
-            </span>
+      <!-- Tarjeta WOW: Telemetría (Gráfica Chart.js) -->
+      <div class="bg-cardBg rounded-2xl p-5 shadow-lg border border-gray-800/50">
+        <h3 class="text-xs font-bold text-textMuted mb-2 uppercase tracking-wider">Telemetría en Tiempo Real</h3>
+        <div class="h-32 w-full">
+          <canvas id="telemetriaChart" #telemetriaCanvas></canvas>
+        </div>
+      </div>
+
+      <!-- Tarjeta Control de Voz -->
+      <div class="bg-cardBg rounded-2xl p-5 shadow-lg border border-gray-800/50">
+        <h3 class="text-xs font-bold text-textMuted mb-3 uppercase tracking-wider">Control de Voz</h3>
+        <div class="flex flex-col items-center gap-3">
+          <ion-fab-button
+            [color]="micColor"
+            (click)="toggleMic()"
+            class="w-16 h-16"
+            [class.animate-pulse]="voiceStatus === 'listening'">
+            <ion-icon [name]="micIcon" style="font-size: 1.8rem;"></ion-icon>
+          </ion-fab-button>
+
+          <div class="text-center px-4">
+            <p class="text-xs font-semibold"
+              [class.text-green-400]="voiceStatus === 'success'"
+              [class.text-red-400]="voiceStatus === 'error'"
+              [class.text-amber-400]="voiceStatus === 'unknown' || voiceStatus === 'processing'"
+              [class.text-accentWine]="voiceStatus === 'listening'"
+              [class.text-white]="voiceStatus === 'idle'">
+              {{ statusMessage }}
+            </p>
           </div>
         </div>
       </div>
+
+      <!-- Tarjeta Control Manual -->
+      <div class="bg-cardBg rounded-2xl p-5 shadow-lg border border-gray-800/50">
+        <h3 class="text-xs font-bold text-textMuted mb-3 uppercase tracking-wider">Control Manual</h3>
+        <div class="grid grid-cols-2 gap-2 mb-2">
+          <button (click)="simulateVoice('ARRIBA')" class="bg-cardBgDark hover:bg-gray-700 py-3 rounded-xl text-sm font-semibold transition text-white">Arriba ↑</button>
+          <button (click)="simulateVoice('ABAJO')" class="bg-cardBgDark hover:bg-gray-700 py-3 rounded-xl text-sm font-semibold transition text-white">Abajo ↓</button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mb-2">
+          <button (click)="simulateVoice('ABRIR')" class="bg-cardBgDark hover:bg-gray-700 py-3 rounded-xl text-sm font-semibold transition text-white">Abrir</button>
+          <button (click)="simulateVoice('CERRAR')" class="bg-cardBgDark hover:bg-gray-700 py-3 rounded-xl text-sm font-semibold transition text-white">Cerrar</button>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button (click)="simulateVoice('IZQUIERDA')" class="bg-cardBgDark hover:bg-gray-700 py-3 rounded-xl text-sm font-semibold transition text-white">Izq ←</button>
+          <button (click)="simulateVoice('DERECHA')" class="bg-cardBgDark hover:bg-gray-700 py-3 rounded-xl text-sm font-semibold transition text-white">Der →</button>
+        </div>
+      </div>
+
     </div>
 
-    <!-- Botones Manuales -->
-    <div>
-      <h3 class="text-xs font-bold text-textLight opacity-50 mb-2">CONTROL MANUAL</h3>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <button (click)="simulateVoice('ARRIBA')" class="bg-bgCard text-textLight border border-borderBrand text-xs font-bold py-3.5 px-3 rounded-2xl">Arriba ↑</button>
-        <button (click)="simulateVoice('ABAJO')" class="bg-bgCard text-textLight border border-borderBrand text-xs font-bold py-3.5 px-3 rounded-2xl">Abajo ↓</button>
-        <button (click)="simulateVoice('ABRIR')" class="bg-bgCard text-textLight border border-borderBrand text-xs font-bold py-3.5 px-3 rounded-2xl">Abrir </button>
-        <button (click)="simulateVoice('CERRAR')" class="bg-bgCard text-textLight border border-borderBrand text-xs font-bold py-3.5 px-3 rounded-2xl">Cerrar </button>
-        <button (click)="simulateVoice('IZQUIERDA')" class="bg-bgCard text-textLight border border-borderBrand text-xs font-bold py-3.5 px-3 rounded-2xl">Izq ←</button>
-        <button (click)="simulateVoice('DERECHA')" class="bg-bgCard text-textLight border border-borderBrand text-xs font-bold py-3.5 px-3 rounded-2xl">Der →</button>
-        <button (click)="simulateVoice('ALTO')" class="bg-bgCard text-red-400 border border-red-400 text-xs font-bold py-3.5 px-3 rounded-2xl col-span-2">⛔ ALTO</button>
+    <!-- VISTA: RUTINAS -->
+    <div *ngIf="currentView === 'rutinas'" class="fade-in space-y-4">
+      
+      <div class="bg-cardBgDark p-4 rounded-xl border border-accentWine/30 shadow-[0_0_15px_rgba(168,50,80,0.1)]">
+        <h2 class="text-lg font-bold text-white mb-1">Gestor de Rutinas</h2>
+        <p class="text-xs text-textMuted">Ejecuta secuencias complejas automatizadas con un solo toque.</p>
       </div>
+
+      <!-- Rutina 1: Asistencia Médica -->
+      <div class="bg-cardBg rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
+        <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-cardBgDark">
+          <div>
+            <span class="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-1 rounded-md font-bold uppercase">Asistencia Médica</span>
+            <h3 class="font-bold text-white mt-1">Acercar Medicamento</h3>
+          </div>
+          <button
+            (click)="ejecutarRutina('rutina1', pasosRutina1)"
+            [disabled]="ejecutandoRutina"
+            class="bg-accentWine hover:bg-pink-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg transition flex items-center gap-1.5">
+            <span *ngIf="!ejecutandoRutina || pasoActivoRutina1 === -1">Ejecutar <i class="fas fa-play ml-1"></i></span>
+            <span *ngIf="ejecutandoRutina && pasoActivoRutina1 !== -1"><i class="fas fa-spinner fa-spin mr-1"></i> En curso...</span>
+          </button>
+        </div>
+        <div class="p-4">
+          <p class="text-xs text-textMuted mb-3">Secuencia de movimientos:</p>
+          <div class="flex flex-wrap gap-2">
+            <span
+              *ngFor="let paso of pasosRutina1; let i = index"
+              [ngClass]="{
+                'bg-white text-black shadow-[0_0_10px_white]': pasoActivoRutina1 === i,
+                'bg-accentWine text-white': pasoCompletadoRutina1[i] && pasoActivoRutina1 !== i,
+                'bg-gray-800 text-textMuted border border-gray-700': pasoActivoRutina1 !== i && !pasoCompletadoRutina1[i]
+              }"
+              class="text-[10px] px-2 py-1 rounded-md uppercase font-bold transition-colors">
+              {{ paso }}
+            </span>
+          </div>
+
+          <!-- Barra de progreso -->
+          <div class="w-full bg-gray-800 rounded-full h-1.5 mt-4 overflow-hidden">
+            <div class="bg-accentWine h-1.5 rounded-full transition-all duration-300" [style.width.%]="progresoRutina1"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rutina 2: Uso Industrial -->
+      <div class="bg-cardBg rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
+        <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-cardBgDark">
+          <div>
+            <span class="text-[10px] bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded-md font-bold uppercase">Uso Industrial</span>
+            <h3 class="font-bold text-white mt-1">Ensamblaje de Pieza</h3>
+          </div>
+          <button
+            (click)="ejecutarRutina('rutina2', pasosRutina2)"
+            [disabled]="ejecutandoRutina"
+            class="bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg transition flex items-center gap-1.5">
+            <span *ngIf="!ejecutandoRutina || pasoActivoRutina2 === -1">Ejecutar <i class="fas fa-play ml-1"></i></span>
+            <span *ngIf="ejecutandoRutina && pasoActivoRutina2 !== -1"><i class="fas fa-spinner fa-spin mr-1"></i> En curso...</span>
+          </button>
+        </div>
+        <div class="p-4">
+          <p class="text-xs text-textMuted mb-3">Secuencia de movimientos:</p>
+          <div class="flex flex-wrap gap-2">
+            <span
+              *ngFor="let paso of pasosRutina2; let i = index"
+              [ngClass]="{
+                'bg-white text-black shadow-[0_0_10px_white]': pasoActivoRutina2 === i,
+                'bg-yellow-500 text-black': pasoCompletadoRutina2[i] && pasoActivoRutina2 !== i,
+                'bg-gray-800 text-textMuted border border-gray-700': pasoActivoRutina2 !== i && !pasoCompletadoRutina2[i]
+              }"
+              class="text-[10px] px-2 py-1 rounded-md uppercase font-bold transition-colors">
+              {{ paso }}
+            </span>
+          </div>
+
+          <!-- Barra de progreso -->
+          <div class="w-full bg-gray-800 rounded-full h-1.5 mt-4 overflow-hidden">
+            <div class="bg-yellow-500 h-1.5 rounded-full transition-all duration-300" [style.width.%]="progresoRutina2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta Crear Nueva Secuencia -->
+      <div class="border-2 border-dashed border-gray-800 hover:border-accentWine/50 rounded-2xl p-6 text-center cursor-pointer transition-colors group">
+        <p class="text-sm font-bold text-textMuted group-hover:text-accentWine transition-colors flex items-center justify-center gap-2">
+          <i class="fas fa-plus"></i> Crear Nueva Secuencia
+        </p>
+      </div>
+
     </div>
 
   </main>
 </ion-content>
+
+<!-- Toast de Notificación Personalizada -->
+<div
+  [class.opacity-100]="showToast"
+  [class.opacity-0]="!showToast"
+  class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-2xl transition-opacity duration-300 pointer-events-none z-50 flex items-center border border-gray-700">
+  <i class="fas fa-info-circle text-accentBlue mr-2"></i>
+  <span class="text-sm font-semibold">{{ toastMessage }}</span>
+</div>
