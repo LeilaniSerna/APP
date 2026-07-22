@@ -18,9 +18,23 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 
-// Conexión a MongoDB (controlar error de manera que no detenga el arranque local si no hay .env aún)
-connectDB().catch((err) => {
-  console.warn('Aviso: No se pudo conectar a MongoDB de forma inicial (rellena tu archivo .env):', err.message);
+// Variable para evitar reconexiones múltiples en Vercel Serverless
+let isConnected = false;
+
+// Middleware Asíncrono: Obliga a todas las peticiones a esperar la conexión a MongoDB
+app.use(async (req, res, next) => {
+  if (!isConnected) {
+    try {
+      await connectDB();
+      isConnected = true;
+      console.log('MongoDB conectado exitosamente a través del middleware');
+    } catch (err) {
+      console.error('Error al intentar conectar a MongoDB:', err.message);
+      // Si la base de datos no conecta, frenamos la petición aquí devolviendo el error 500
+      return res.status(500).json({ error: 'Error de conexión inicial con la base de datos' });
+    }
+  }
+  next(); // Si ya está conectado o se acaba de conectar, continúa a la ruta que el usuario pidió
 });
 
 // Rutas de autenticación
@@ -79,7 +93,7 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
     message: 'Backend de brazo robótico A-ARM funcionando correctamente',
-    mongodbConnection: require('mongoose').connection.readyState === 1 ? 'Conectado' : 'Desconectado'
+    mongodbConnection: isConnected ? 'Conectado' : 'Desconectado'
   });
 });
 
