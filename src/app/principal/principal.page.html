@@ -121,9 +121,14 @@
     <!-- VISTA: RUTINAS -->
     <div *ngIf="currentView === 'rutinas'" class="fade-in space-y-4">
       
-      <div class="bg-cardBgDark p-4 rounded-xl border border-accentWine/30 shadow-[0_0_15px_rgba(168,50,80,0.1)]">
-        <h2 class="text-lg font-bold text-white mb-1">Gestor de Rutinas</h2>
-        <p class="text-xs text-textMuted">Ejecuta secuencias complejas automatizadas con un solo toque.</p>
+      <div class="bg-cardBgDark p-4 rounded-xl border border-accentWine/30 shadow-[0_0_15px_rgba(168,50,80,0.1)] flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold text-white mb-1">Gestor de Rutinas</h2>
+          <p class="text-xs text-textMuted">Ejecuta secuencias complejas automatizadas con un solo toque.</p>
+        </div>
+        <button (click)="abrirModalCrear()" class="bg-accentWine text-white p-3 rounded-xl hover:bg-pink-700 transition shadow-lg flex items-center justify-center">
+          <i class="fas fa-plus"></i>
+        </button>
       </div>
 
       <!-- Iteración Dinámica de Rutinas cargadas desde MongoDB Atlas -->
@@ -175,7 +180,7 @@
       </div>
 
       <!-- Tarjeta Crear Nueva Secuencia -->
-      <div class="border-2 border-dashed border-gray-800 hover:border-accentWine/50 rounded-2xl p-6 text-center cursor-pointer transition-colors group">
+      <div (click)="abrirModalCrear()" class="border-2 border-dashed border-gray-800 hover:border-accentWine/50 rounded-2xl p-6 text-center cursor-pointer transition-colors group">
         <p class="text-sm font-bold text-textMuted group-hover:text-accentWine transition-colors flex items-center justify-center gap-2">
           <i class="fas fa-plus"></i> Crear Nueva Secuencia
         </p>
@@ -184,7 +189,115 @@
     </div>
 
   </main>
+
+  <!-- Botón Flotante FAB en la parte inferior derecha de la vista RUTINAS -->
+  <ion-fab *ngIf="currentView === 'rutinas'" slot="fixed" vertical="bottom" horizontal="end" class="mb-6 mr-4">
+    <ion-fab-button (click)="abrirModalCrear()" class="bg-accentWine text-white shadow-2xl">
+      <i class="fas fa-plus text-lg"></i>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>
+
+<!-- MODAL DE CREACIÓN DE NUEVA RUTINA -->
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="cerrarModal()">
+  <ng-template>
+    <div class="bg-appBg min-h-full p-5 text-white flex flex-col justify-between space-y-6">
+      
+      <!-- Cabecera del Modal -->
+      <div class="flex justify-between items-center border-b border-gray-800 pb-4">
+        <div>
+          <h2 class="text-lg font-extrabold tracking-wider text-white">Crear Nueva Rutina</h2>
+          <p class="text-xs text-textMuted">Diseña una secuencia personalizada para tu brazo</p>
+        </div>
+        <button (click)="cerrarModal()" class="text-textMuted hover:text-white p-2 text-lg">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Formulario del Modal -->
+      <div class="space-y-4 flex-1">
+        
+        <!-- Campo: Título -->
+        <div class="space-y-1.5">
+          <label class="text-xs text-textMuted uppercase font-bold tracking-wider">Título de la Rutina</label>
+          <input
+            type="text"
+            [(ngModel)]="nuevaRutinaTitulo"
+            placeholder="Ej. Preparar café"
+            class="w-full bg-cardBg border border-gray-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-accentWine transition">
+        </div>
+
+        <!-- Campo: Categoría -->
+        <div class="space-y-1.5">
+          <label class="text-xs text-textMuted uppercase font-bold tracking-wider">Categoría</label>
+          <select
+            [(ngModel)]="nuevaRutinaCategoria"
+            class="w-full bg-cardBg border border-gray-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-accentWine transition">
+            <option value="ASISTENCIA MÉDICA">ASISTENCIA MÉDICA</option>
+            <option value="USO INDUSTRIAL">USO INDUSTRIAL</option>
+            <option value="PERSONALIZADA">PERSONALIZADA</option>
+          </select>
+        </div>
+
+        <!-- Constructor de Secuencia -->
+        <div class="bg-cardBg rounded-2xl p-4 border border-gray-800 space-y-3">
+          <div class="flex justify-between items-center">
+            <label class="text-xs text-textMuted uppercase font-bold tracking-wider">Construir Secuencia</label>
+            <button
+              (click)="borrarUltimoComando()"
+              [disabled]="nuevaRutinaComandos.length === 0"
+              class="text-xs text-red-400 hover:text-red-300 disabled:opacity-30 font-semibold flex items-center gap-1">
+              <i class="fas fa-undo"></i> Borrar último paso
+            </button>
+          </div>
+
+          <!-- Cuadrícula de botones con comandos válidos -->
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              *ngFor="let cmd of comandosDisponibles"
+              (click)="agregarComandoAFormulario(cmd)"
+              class="bg-cardBgDark hover:bg-gray-700 py-2.5 rounded-xl text-xs font-bold uppercase transition text-white border border-gray-700">
+              + {{ cmd }}
+            </button>
+          </div>
+
+          <!-- Secuencia Visual (Chips) -->
+          <div class="mt-3 pt-3 border-t border-gray-800">
+            <p class="text-[11px] text-textMuted mb-2">Pasos acumulados ({{ nuevaRutinaComandos.length }}):</p>
+            <div *ngIf="nuevaRutinaComandos.length === 0" class="text-xs text-gray-500 italic">
+              Toca los botones superiores para ir agregando pasos.
+            </div>
+            <div *ngIf="nuevaRutinaComandos.length > 0" class="flex flex-wrap gap-2">
+              <span
+                *ngFor="let paso of nuevaRutinaComandos; let idx = index"
+                class="bg-accentWine text-white text-[11px] px-2.5 py-1 rounded-md uppercase font-bold shadow">
+                {{ idx + 1 }}. {{ paso }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="grid grid-cols-2 gap-3 pt-4 border-t border-gray-800">
+        <button
+          (click)="cerrarModal()"
+          class="bg-cardBgDark hover:bg-gray-700 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition">
+          Cancelar
+        </button>
+        <button
+          (click)="guardarNuevaRutina()"
+          [disabled]="guardandoRutina || !nuevaRutinaTitulo.trim() || nuevaRutinaComandos.length === 0"
+          class="bg-accentWine hover:bg-pink-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg flex items-center justify-center gap-2">
+          <span *ngIf="!guardandoRutina">Guardar Rutina</span>
+          <span *ngIf="guardandoRutina"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
+        </button>
+      </div>
+
+    </div>
+  </ng-template>
+</ion-modal>
 
 <!-- Toast de Notificación Personalizada -->
 <div
