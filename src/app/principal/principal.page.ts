@@ -1,11 +1,12 @@
 import { Component, OnDestroy, AfterViewInit, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { VoiceService, VoiceStatus } from '../services/voice';
 import { RoutineService, Routine } from '../services/routine.service';
 import { addIcons } from 'ionicons';
-import { mic, micOutline, optionsOutline } from 'ionicons/icons';
+import { mic, micOutline, optionsOutline, addOutline, closeOutline, backspaceOutline } from 'ionicons/icons';
 import {
   IonContent,
   IonHeader,
@@ -14,7 +15,9 @@ import {
   IonButtons,
   IonButton,
   IonIcon,
+  IonFab,
   IonFabButton,
+  IonModal,
 } from '@ionic/angular/standalone';
 
 declare const Chart: any;
@@ -25,6 +28,7 @@ declare const Chart: any;
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     IonContent,
     IonHeader,
     IonToolbar,
@@ -32,7 +36,9 @@ declare const Chart: any;
     IonButtons,
     IonButton,
     IonIcon,
-    IonFabButton
+    IonFab,
+    IonFabButton,
+    IonModal,
   ],
 })
 export class HomePage implements OnInit, OnDestroy, AfterViewInit {
@@ -70,6 +76,16 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   pasosCompletados: boolean[] = [];
   progresoActual = 0;
 
+  // Estado del Modal de Creación de Rutinas
+  isModalOpen = false;
+  nuevaRutinaTitulo = '';
+  nuevaRutinaCategoria = 'PERSONALIZADA';
+  nuevaRutinaComandos: string[] = [];
+  guardandoRutina = false;
+
+  // Comandos válidos disponibles para construir la secuencia
+  comandosDisponibles = ['abrir', 'cerrar', 'subir', 'bajar', 'izquierda', 'derecha'];
+
   // Toast Notificaciones
   showToast = false;
   toastMessage = '';
@@ -81,7 +97,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private routineService: RoutineService,
     private router: Router
   ) {
-    addIcons({ mic, micOutline, optionsOutline });
+    addIcons({ mic, micOutline, optionsOutline, addOutline, closeOutline, backspaceOutline });
 
     this.subs.add(
       this.voiceService.status$.subscribe((s) => (this.voiceStatus = s))
@@ -122,7 +138,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       },
       error: (err) => {
         console.error('Error al cargar rutinas desde el backend:', err);
-        // Fallback por defecto si no hay conexión temporal
+        // Fallback dinámico si no hay conexión
         this.rutinas = [
           {
             _id: 'default-1',
@@ -141,7 +157,68 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  // --- NAVEGACIÓN ---
+  // --- MÉTODOS DEL MODAL DE CREACIÓN DE RUTINAS ---
+  abrirModalCrear() {
+    this.nuevaRutinaTitulo = '';
+    this.nuevaRutinaCategoria = 'PERSONALIZADA';
+    this.nuevaRutinaComandos = [];
+    this.isModalOpen = true;
+  }
+
+  cerrarModal() {
+    this.isModalOpen = false;
+    this.guardandoRutina = false;
+  }
+
+  agregarComandoAFormulario(cmd: string) {
+    this.nuevaRutinaComandos.push(cmd.toLowerCase());
+  }
+
+  borrarUltimoComando() {
+    if (this.nuevaRutinaComandos.length > 0) {
+      this.nuevaRutinaComandos.pop();
+    }
+  }
+
+  guardarNuevaRutina() {
+    if (!this.nuevaRutinaTitulo.trim()) {
+      this.mostrarToast('Ingresa un título para la rutina');
+      return;
+    }
+    if (this.nuevaRutinaComandos.length === 0) {
+      this.mostrarToast('Agrega al menos un comando a la secuencia');
+      return;
+    }
+
+    this.guardandoRutina = true;
+
+    const nuevaRutinaObj: Routine = {
+      titulo: this.nuevaRutinaTitulo.trim(),
+      categoria: this.nuevaRutinaCategoria,
+      comandos: this.nuevaRutinaComandos
+    };
+
+    this.routineService.createRoutine(nuevaRutinaObj).subscribe({
+      next: (res) => {
+        this.mostrarToast('¡Rutina creada y guardada en MongoDB!');
+        this.cerrarModal();
+        this.cargarRutinas(); // Actualizar inmediatamente la lista dinámicamente
+      },
+      error: (err) => {
+        console.error('Error al guardar la rutina en MongoDB:', err);
+        // Guardado local reactivo de respaldo si falla la red
+        const rutinaBackup: Routine = {
+          _id: `custom-${Date.now()}`,
+          ...nuevaRutinaObj
+        };
+        this.rutinas.unshift(rutinaBackup);
+        this.mostrarToast('Rutina agregada a tu lista');
+        this.cerrarModal();
+      }
+    });
+  }
+
+  // --- NAVEGACIÓN Y VISTAS ---
   switchView(view: 'monitor' | 'rutinas') {
     this.currentView = view;
     if (view === 'rutinas' && this.rutinas.length === 0) {
@@ -264,7 +341,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     }, 3000);
   }
 
-  // Auxiliar para determinar la clase de la categoría
+  // Auxiliares de formato para las tarjetas
   getCategoriaBadgeClass(categoria: string): string {
     const cat = (categoria || '').toUpperCase();
     if (cat.includes('MÉDICA') || cat.includes('MEDICA')) {
@@ -275,7 +352,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     return 'bg-accentWine/20 text-accentWine';
   }
 
-  // Auxiliar para determinar la clase del botón de ejecución
   getBotonEjecutarClass(categoria: string): string {
     const cat = (categoria || '').toUpperCase();
     if (cat.includes('INDUSTRIAL')) {
@@ -284,7 +360,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     return 'bg-accentWine hover:bg-pink-700';
   }
 
-  // Auxiliar para determinar el color de la barra de progreso
   getProgresoColorClass(categoria: string): string {
     const cat = (categoria || '').toUpperCase();
     if (cat.includes('INDUSTRIAL')) {
