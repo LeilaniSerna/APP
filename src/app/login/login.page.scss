@@ -1,0 +1,64 @@
+/* ===================================================
+   HOJA DE ESTILOS COMPLETA - LOGIN PAGE
+   =================================================== */
+
+// 1. Reset de Ion-Content para permitir fondos personalizados
+ion-content {
+  --background: transparent !important;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+// 2. Animación de la línea del Escaneo Facial
+@keyframes scanAnimation {
+  0% {
+    top: 0%;
+    opacity: 0.7;
+  }
+  50% {
+    top: 95%;
+    opacity: 1;
+  }
+  100% {
+    top: 0%;
+    opacity: 0.7;
+  }
+}
+
+.scan-line {
+  position: absolute;
+  animation: scanAnimation 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+// 3. Estilos de interactividad para los Inputs
+input {
+  transition: all 0.25s ease-in-out;
+
+  &::placeholder {
+    color: #4b5563;
+    font-size: 0.85rem;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+  }
+}
+
+// 4. Animación de click/tap en los botones
+button {
+  transition: transform 0.15s ease, background-color 0.2s ease;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+// 5. Ajuste para pantallas pequeñas (Mobile)
+@media (max-height: 670px) {
+  .login-card {
+    padding: 1.25rem !important;
+    gap: 1rem !important;
+  }
+}

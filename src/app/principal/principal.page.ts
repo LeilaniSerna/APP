@@ -16,6 +16,7 @@ import {
   IonButtons,
   IonButton,
   IonIcon,
+  IonFab,
   IonFabButton,
   IonModal,
 } from '@ionic/angular/standalone';
@@ -23,8 +24,9 @@ import {
 declare const Chart: any;
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-principal',
   templateUrl: './principal.page.html',
+  styleUrls: ['./principal.page.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -37,6 +39,7 @@ declare const Chart: any;
     IonButtons,
     IonButton,
     IonIcon,
+    IonFab,
     IonFabButton,
     IonModal,
   ],
@@ -68,7 +71,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   consumoData = [0.2, 0.3, 0.2, 0.4, 0.3, 0.2, 0.2];
   private telemetriaInterval: any = null;
 
-  // Gestor de Rutinas desde MongoDB Atlas
+  // Gestor de Rutinas
   rutinas: Routine[] = [];
   ejecutandoRutina = false;
   rutinaEnEjecucionId: string | null = null;
@@ -83,7 +86,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   nuevaRutinaComandos: string[] = [];
   guardandoRutina = false;
 
-  // Comandos válidos disponibles para construir la secuencia
+  // Comandos válidos disponibles
   comandosDisponibles = ['abrir', 'cerrar', 'subir', 'bajar', 'izquierda', 'derecha'];
 
   // Toast Notificaciones
@@ -130,31 +133,23 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  // Cargar las rutinas dinámicas del usuario desde MongoDB Atlas
-  cargarRutinas() {
-    this.routineService.getRoutines().subscribe({
-      next: (data) => {
-        this.rutinas = data;
-      },
-      error: (err) => {
-        console.error('Error al cargar rutinas desde el backend:', err);
-        // Fallback dinámico si no hay conexión
-        this.rutinas = [
-          {
-            _id: 'default-1',
-            titulo: 'Acercar Medicamento',
-            categoria: 'ASISTENCIA MÉDICA',
-            comandos: ['abrir', 'derecha', 'bajar', 'cerrar', 'arriba', 'izquierda']
-          },
-          {
-            _id: 'default-2',
-            titulo: 'Ensamblaje de Pieza',
-            categoria: 'USO INDUSTRIAL',
-            comandos: ['bajar', 'cerrar', 'arriba', 'derecha', 'abajo', 'abrir']
-          }
-        ];
-      }
-    });
+  // --- NAVEGACIÓN Y VISTAS ---
+  switchView(view: 'monitor' | 'rutinas') {
+    this.currentView = view;
+    if (view === 'rutinas' && this.rutinas.length === 0) {
+      this.cargarRutinas();
+    }
+    if (view === 'monitor') {
+      setTimeout(() => {
+        if (!this.telemetriaChart) {
+          this.initChart();
+        }
+      }, 100);
+    }
+  }
+
+  goToConfiguracion() {
+    this.router.navigate(['/configuracion']);
   }
 
   // --- MÉTODOS DEL MODAL DE CREACIÓN DE RUTINAS ---
@@ -199,42 +194,47 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     };
 
     this.routineService.createRoutine(nuevaRutinaObj).subscribe({
-      next: (res) => {
-        this.mostrarToast('¡Rutina creada y guardada en MongoDB!');
+      next: () => {
+        this.mostrarToast('¡Rutina creada y guardada!');
         this.cerrarModal();
-        this.cargarRutinas(); // Actualizar inmediatamente la lista dinámicamente
+        this.cargarRutinas();
       },
       error: (err) => {
-        console.error('Error al guardar la rutina en MongoDB:', err);
-        // Guardado local reactivo de respaldo si falla la red
+        console.error('Error al guardar la rutina:', err);
         const rutinaBackup: Routine = {
           _id: `custom-${Date.now()}`,
           ...nuevaRutinaObj
         };
         this.rutinas.unshift(rutinaBackup);
-        this.mostrarToast('Rutina agregada a tu lista');
+        this.mostrarToast('Rutina agregada localmente');
         this.cerrarModal();
       }
     });
   }
 
-  // --- NAVEGACIÓN Y VISTAS ---
-  switchView(view: 'monitor' | 'rutinas') {
-    this.currentView = view;
-    if (view === 'rutinas' && this.rutinas.length === 0) {
-      this.cargarRutinas();
-    }
-    if (view === 'monitor') {
-      setTimeout(() => {
-        if (!this.telemetriaChart) {
-          this.initChart();
-        }
-      }, 100);
-    }
-  }
-
-  goToConfiguracion() {
-    this.router.navigate(['/configuracion']);
+  cargarRutinas() {
+    this.routineService.getRoutines().subscribe({
+      next: (data) => {
+        this.rutinas = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar rutinas:', err);
+        this.rutinas = [
+          {
+            _id: 'default-1',
+            titulo: 'Acercar Medicamento',
+            categoria: 'ASISTENCIA MÉDICA',
+            comandos: ['abrir', 'derecha', 'bajar', 'cerrar', 'arriba', 'izquierda']
+          },
+          {
+            _id: 'default-2',
+            titulo: 'Ensamblaje de Pieza',
+            categoria: 'USO INDUSTRIAL',
+            comandos: ['bajar', 'cerrar', 'arriba', 'derecha', 'abajo', 'abrir']
+          }
+        ];
+      }
+    });
   }
 
   // --- TELEMETRÍA (CHART.JS) ---
@@ -297,7 +297,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     }, 2000);
   }
 
-  // --- SISTEMA TOAST ---
   mostrarToast(mensaje: string) {
     this.toastMessage = mensaje;
     this.showToast = true;
@@ -306,7 +305,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     }, 2500);
   }
 
-  // --- GESTOR DE RUTINAS DINÁMICO ---
+  // --- GESTOR DE RUTINAS ---
   async ejecutarRutina(rutina: Routine) {
     if (this.ejecutandoRutina) {
       this.mostrarToast('Ya hay una rutina en ejecución');
@@ -341,7 +340,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     }, 3000);
   }
 
-  // Auxiliares de formato para las tarjetas
   getCategoriaBadgeClass(categoria: string): string {
     const cat = (categoria || '').toUpperCase();
     if (cat.includes('MÉDICA') || cat.includes('MEDICA')) {
@@ -352,40 +350,13 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     return 'bg-accentWine/20 text-accentWine';
   }
 
-  getBotonEjecutarClass(categoria: string): string {
-    const cat = (categoria || '').toUpperCase();
-    if (cat.includes('INDUSTRIAL')) {
-      return 'bg-gray-700 hover:bg-gray-600';
-    }
-    return 'bg-accentWine hover:bg-pink-700';
-  }
-
-  getProgresoColorClass(categoria: string): string {
-    const cat = (categoria || '').toUpperCase();
-    if (cat.includes('INDUSTRIAL')) {
-      return 'bg-yellow-500';
-    }
-    return 'bg-accentWine';
-  }
-
-  // --- CONTROL DE VOZ Y SIMULADOR DEL BRAZO ---
+  // --- CONTROL DE VOZ Y SIMULADOR ---
   toggleMic() {
     this.voiceService.toggleListening();
   }
 
   get micIcon(): string {
     return this.voiceService.listening ? 'mic' : 'mic-outline';
-  }
-
-  get micColor(): string {
-    switch (this.voiceStatus) {
-      case 'listening':  return 'danger';
-      case 'processing': return 'warning';
-      case 'success':    return 'success';
-      case 'error':      return 'medium';
-      case 'unknown':    return 'warning';
-      default:           return 'primary';
-    }
   }
 
   applyCommand(cmd: string) {

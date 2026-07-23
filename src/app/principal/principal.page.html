@@ -1,55 +1,74 @@
 <ion-header class="ion-no-border">
-  <ion-toolbar class="bg-appBg border-b border-gray-800 text-white px-2">
-    <ion-title class="text-base font-extrabold tracking-wider uppercase text-white">A-ARM BRAZO ROBÓTICO</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="goToConfiguracion()" class="text-textMuted hover:text-white transition">
-        <i class="fa-solid fa-user text-lg"></i>
-      </ion-button>
-    </ion-buttons>
+  <ion-toolbar style="--background: transparent;" class="px-2 pt-2">
+    <div class="flex justify-between items-center bg-[#212326]/80 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2 shadow-lg">
+      <ion-title class="text-sm font-bold tracking-widest uppercase text-white p-0">
+        A-ARM BRAZO ROBÓTICO
+      </ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="goToConfiguracion()" class="text-gray-300 hover:text-white transition">
+          <i class="fa-solid fa-user text-base"></i>
+        </ion-button>
+      </ion-buttons>
+    </div>
   </ion-toolbar>
 </ion-header>
 
-<nav class="flex border-b border-gray-800 bg-appBg sticky top-0 z-10">
-  <button (click)="switchView('monitor')" [class.active]="currentView === 'monitor'" class="tab-btn flex-1 py-3 text-sm font-semibold text-textMuted transition">
-    MONITOR
-  </button>
-  <button (click)="switchView('rutinas')" [class.active]="currentView === 'rutinas'" class="tab-btn flex-1 py-3 text-sm font-semibold text-textMuted transition">
-    RUTINAS
-  </button>
+<!-- Navegación de Pestañas (Tabs de Cristal) -->
+<nav class="flex px-4 pt-2 sticky top-0 z-20">
+  <div class="flex w-full bg-[#181a1d]/80 backdrop-blur-md border border-white/10 rounded-full p-1 shadow-md">
+    <button 
+      (click)="switchView('monitor')" 
+      [class.bg-[#3a3d42]]="currentView === 'monitor'"
+      [class.text-white]="currentView === 'monitor'"
+      [class.text-gray-400]="currentView !== 'monitor'"
+      class="flex-1 py-2 rounded-full text-xs font-bold tracking-wider transition-all duration-200">
+      MONITOR
+    </button>
+    <button 
+      (click)="switchView('rutinas')" 
+      [class.bg-[#3a3d42]]="currentView === 'rutinas'"
+      [class.text-white]="currentView === 'rutinas'"
+      [class.text-gray-400]="currentView !== 'rutinas'"
+      class="flex-1 py-2 rounded-full text-xs font-bold tracking-wider transition-all duration-200">
+      RUTINAS
+    </button>
+  </div>
 </nav>
 
-<ion-content class="bg-appBg">
-  <main class="max-w-xl w-full mx-auto p-4 space-y-4 pb-24">
+<ion-content style="--background: url('/assets/img/login-background.png') no-repeat center center / cover;">
+  <main class="max-w-md w-full mx-auto p-4 space-y-5 pb-28">
 
-    <!-- VISTA: MONITOR -->
+    <!-- ==================== VISTA: MONITOR ==================== -->
     <div *ngIf="currentView === 'monitor'" class="fade-in space-y-4">
 
       <!-- Tarjeta de Estado del Brazo -->
-      <div class="bg-cardBg rounded-2xl p-5 relative overflow-hidden shadow-lg border border-gray-800/50">
-        <div class="flex justify-between items-start mb-4">
+      <div class="bg-[#212326]/75 backdrop-blur-md border border-white/20 rounded-[30px] p-5 shadow-xl relative overflow-hidden">
+        <div class="flex justify-between items-start mb-2">
           <div>
-            <h3 class="text-xs font-bold text-textMuted uppercase">ESTADO</h3>
-            <h2 class="text-accentWine text-xl font-bold tracking-widest uppercase" [ngClass]="robotColor">{{ robotState }}</h2>
+            <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">ESTADO</h3>
+            <h2 class="text-white text-lg font-extrabold tracking-wider uppercase mt-0.5" [ngClass]="robotColor">
+              {{ robotState }}
+            </h2>
           </div>
-          <div class="text-right">
-            <p class="text-xs font-bold text-gray-400">12V DC</p>
-            <p class="text-[10px] text-accentWine font-semibold">{{ voltage }}</p>
+          <div class="text-right bg-black/20 px-3 py-1.5 rounded-2xl border border-white/5">
+            <p class="text-[10px] font-bold text-gray-300">12V DC</p>
+            <p class="text-[11px] text-pink-400 font-mono font-bold">{{ voltage }}</p>
           </div>
         </div>
 
-        <!-- Simulación de SVG del brazo -->
-        <div class="h-36 flex items-center justify-center relative">
-          <svg viewBox="0 0 300 200" class="w-full h-full max-w-[280px]">
-            <rect x="20" y="170" width="100" height="15" rx="4" fill="#232529" stroke="#374151" />
-            <line x1="70" y1="170" x2="70" y2="185" stroke="#121212" stroke-width="4" />
-            <circle cx="70" cy="160" r="12" fill="#a83250" />
+        <!-- Simulación SVG del brazo -->
+        <div class="h-40 flex items-center justify-center relative my-1 bg-black/20 rounded-2xl border border-white/5 p-2">
+          <svg viewBox="0 0 300 200" class="w-full h-full max-w-[260px]">
+            <rect x="20" y="170" width="100" height="15" rx="4" fill="#181a1d" stroke="#374151" />
+            <line x1="70" y1="170" x2="70" y2="185" stroke="#000000" stroke-width="4" />
+            <circle cx="70" cy="160" r="12" fill="#e11d48" />
 
             <g class="arm-joint" style="transform-origin: 70px 160px;" [style.transform]="arm1">
-              <line x1="70" y1="160" x2="70" y2="80" stroke="#a83250" stroke-width="10" stroke-linecap="round" />
+              <line x1="70" y1="160" x2="70" y2="80" stroke="#e11d48" stroke-width="10" stroke-linecap="round" />
               <circle cx="70" cy="80" r="10" fill="#ffffff" />
 
               <g class="arm-joint" style="transform-origin: 70px 80px;" [style.transform]="arm2">
-                <line x1="70" y1="80" x2="150" y2="80" stroke="#a83250" stroke-width="8" stroke-linecap="round" />
+                <line x1="70" y1="80" x2="150" y2="80" stroke="#e11d48" stroke-width="8" stroke-linecap="round" />
                 <circle cx="70" cy="80" r="8" fill="#ffffff" />
 
                 <g style="transform-origin: 150px 80px;">
@@ -57,7 +76,7 @@
                   <path d="M 150 84 Q 165 95 175 85" fill="none" stroke="#ffffff" class="arm-joint" stroke-width="4" [style.transform]="gripB" />
 
                   <g class="transition-opacity duration-300 {{ glassOp }}">
-                    <path d="M 170 65 L 185 65 L 180 95 L 175 95 Z" fill="#a83250" />
+                    <path d="M 170 65 L 185 65 L 180 95 L 175 95 Z" fill="#e11d48" />
                   </g>
                 </g>
               </g>
@@ -66,117 +85,135 @@
         </div>
       </div>
 
-      <!-- Tarjeta WOW: Telemetría (Gráfica Chart.js) -->
-      <div class="bg-cardBg rounded-2xl p-5 shadow-lg border border-gray-800/50">
-        <h3 class="text-xs font-bold text-textMuted mb-2 uppercase tracking-wider">Telemetría en Tiempo Real</h3>
-        <div class="h-32 w-full">
+      <!-- Telemetría (Gráfica Chart.js) -->
+      <div class="bg-[#212326]/75 backdrop-blur-md border border-white/20 rounded-[30px] p-5 shadow-xl">
+        <h3 class="text-[10px] font-bold text-gray-400 mb-3 uppercase tracking-wider">Telemetría en Tiempo Real</h3>
+        <div class="h-32 w-full bg-black/20 p-2 rounded-2xl border border-white/5">
           <canvas id="telemetriaChart" #telemetriaCanvas></canvas>
         </div>
       </div>
 
-      <!-- Tarjeta Control de Voz -->
-      <div class="bg-cardBg rounded-2xl p-5 shadow-lg border border-gray-800/50">
-        <h3 class="text-xs font-bold text-textMuted mb-3 uppercase tracking-wider">Control de Voz</h3>
+      <!-- Control de Voz -->
+      <div class="bg-[#212326]/75 backdrop-blur-md border border-white/20 rounded-[30px] p-5 shadow-xl">
+        <h3 class="text-[10px] font-bold text-gray-400 mb-3 uppercase tracking-wider text-center">Control de Voz</h3>
         <div class="flex flex-col items-center gap-3">
-          <ion-fab-button
-            [color]="micColor"
-            (click)="toggleMic()"
-            class="w-16 h-16"
-            [class.animate-pulse]="voiceStatus === 'listening'">
-            <ion-icon [name]="micIcon" style="font-size: 1.8rem;"></ion-icon>
-          </ion-fab-button>
+          
+          <!-- Opciones y Estado de Voz (ARRIBA) -->
+          <div class="text-center px-2 space-y-2">
+            <div class="flex flex-wrap justify-center gap-1.5 mb-1">
+              <span class="text-[9px] bg-black/30 border border-white/10 text-gray-300 px-2.5 py-0.5 rounded-full font-medium">"ARRIBA"</span>
+              <span class="text-[9px] bg-black/30 border border-white/10 text-gray-300 px-2.5 py-0.5 rounded-full font-medium">"ABAJO"</span>
+              <span class="text-[9px] bg-black/30 border border-white/10 text-gray-300 px-2.5 py-0.5 rounded-full font-medium">"ABRIR"</span>
+              <span class="text-[9px] bg-black/30 border border-white/10 text-gray-300 px-2.5 py-0.5 rounded-full font-medium">"CERRAR"</span>
+              <span class="text-[9px] bg-black/30 border border-white/10 text-gray-300 px-2.5 py-0.5 rounded-full font-medium">"IZQUIERDA"</span>
+              <span class="text-[9px] bg-black/30 border border-white/10 text-gray-300 px-2.5 py-0.5 rounded-full font-medium">"DERECHA"</span>
+            </div>
 
-          <div class="text-center px-4">
-            <p class="text-xs font-semibold"
+            <p class="text-xs font-medium"
               [class.text-green-400]="voiceStatus === 'success'"
               [class.text-red-400]="voiceStatus === 'error'"
               [class.text-amber-400]="voiceStatus === 'unknown' || voiceStatus === 'processing'"
-              [class.text-accentWine]="voiceStatus === 'listening'"
-              [class.text-white]="voiceStatus === 'idle'">
+              [class.text-pink-400]="voiceStatus === 'listening'"
+              [class.text-gray-300]="voiceStatus === 'idle'">
               {{ statusMessage }}
             </p>
           </div>
+
+          <!-- Botón de Micrófono (ABAJO) -->
+          <button 
+            (click)="toggleMic()"
+            [class.animate-pulse]="voiceStatus === 'listening'"
+            class="w-16 h-16 bg-white active:scale-95 text-gray-900 rounded-full shadow-xl flex items-center justify-center transition-all">
+            <ion-icon [name]="micIcon" class="text-2xl text-gray-900"></ion-icon>
+          </button>
+
         </div>
       </div>
 
-      <!-- Tarjeta Control Manual -->
-      <div class="bg-cardBg rounded-2xl p-5 shadow-lg border border-gray-800/50">
-        <h3 class="text-xs font-bold text-textMuted mb-3 uppercase tracking-wider">Control Manual</h3>
-        <div class="grid grid-cols-2 gap-2 mb-2">
-          <button (click)="simulateVoice('ARRIBA')" class="bg-cardBgDark hover:bg-gray-700 py-3 rounded-xl text-sm font-semibold transition text-white">Arriba ↑</button>
-          <button (click)="simulateVoice('ABAJO')" class="bg-cardBgDark hover:bg-gray-700 py-3 rounded-xl text-sm font-semibold transition text-white">Abajo ↓</button>
+      <!-- Control Manual -->
+      <div class="bg-[#212326]/75 backdrop-blur-md border border-white/20 rounded-[30px] p-5 shadow-xl">
+        <h3 class="text-[10px] font-bold text-gray-400 mb-3 uppercase tracking-wider">Control Manual</h3>
+        
+        <div class="grid grid-cols-2 gap-2.5 mb-2.5">
+          <button (click)="simulateVoice('ARRIBA')" class="bg-[#0d0d0e] hover:bg-black active:scale-95 py-3 rounded-full text-xs font-medium transition text-gray-200 border border-white/10">Arriba ↑</button>
+          <button (click)="simulateVoice('ABAJO')" class="bg-[#0d0d0e] hover:bg-black active:scale-95 py-3 rounded-full text-xs font-medium transition text-gray-200 border border-white/10">Abajo ↓</button>
         </div>
-        <div class="grid grid-cols-2 gap-2 mb-2">
-          <button (click)="simulateVoice('ABRIR')" class="bg-cardBgDark hover:bg-gray-700 py-3 rounded-xl text-sm font-semibold transition text-white">Abrir</button>
-          <button (click)="simulateVoice('CERRAR')" class="bg-cardBgDark hover:bg-gray-700 py-3 rounded-xl text-sm font-semibold transition text-white">Cerrar</button>
+        <div class="grid grid-cols-2 gap-2.5 mb-2.5">
+          <button (click)="simulateVoice('ABRIR')" class="bg-[#0d0d0e] hover:bg-black active:scale-95 py-3 rounded-full text-xs font-medium transition text-gray-200 border border-white/10">Abrir</button>
+          <button (click)="simulateVoice('CERRAR')" class="bg-[#0d0d0e] hover:bg-black active:scale-95 py-3 rounded-full text-xs font-medium transition text-gray-200 border border-white/10">Cerrar</button>
         </div>
-        <div class="grid grid-cols-2 gap-2">
-          <button (click)="simulateVoice('IZQUIERDA')" class="bg-cardBgDark hover:bg-gray-700 py-3 rounded-xl text-sm font-semibold transition text-white">Izq ←</button>
-          <button (click)="simulateVoice('DERECHA')" class="bg-cardBgDark hover:bg-gray-700 py-3 rounded-xl text-sm font-semibold transition text-white">Der →</button>
+        <div class="grid grid-cols-2 gap-2.5">
+          <button (click)="simulateVoice('IZQUIERDA')" class="bg-[#0d0d0e] hover:bg-black active:scale-95 py-3 rounded-full text-xs font-medium transition text-gray-200 border border-white/10">Izq ←</button>
+          <button (click)="simulateVoice('DERECHA')" class="bg-[#0d0d0e] hover:bg-black active:scale-95 py-3 rounded-full text-xs font-medium transition text-gray-200 border border-white/10">Der →</button>
         </div>
       </div>
 
     </div>
 
-    <!-- VISTA: RUTINAS -->
+    <!-- ==================== VISTA: RUTINAS ==================== -->
     <div *ngIf="currentView === 'rutinas'" class="fade-in space-y-4">
       
-      <div class="bg-cardBgDark p-4 rounded-xl border border-accentWine/30 shadow-[0_0_15px_rgba(168,50,80,0.1)]">
-        <h2 class="text-lg font-bold text-white mb-1">Gestor de Rutinas</h2>
-        <p class="text-xs text-textMuted">Ejecuta secuencias complejas automatizadas con un solo toque.</p>
+      <!-- Banner Cabecera Rutinas -->
+      <div class="bg-[#212326]/80 backdrop-blur-md p-5 rounded-[28px] border border-white/20 shadow-xl flex justify-between items-center">
+        <div>
+          <h2 class="text-base font-bold text-white mb-0.5">Gestor de Rutinas</h2>
+          <p class="text-xs text-gray-400 font-light">Ejecuta secuencias automatizadas.</p>
+        </div>
+        <button (click)="abrirModalCrear()" class="w-10 h-10 bg-white active:scale-90 text-gray-900 rounded-full flex items-center justify-center transition shadow-lg">
+          <i class="fas fa-plus text-sm"></i>
+        </button>
       </div>
 
-      <!-- Iteración Dinámica de Rutinas cargadas desde MongoDB Atlas -->
-      <div *ngFor="let rutina of rutinas" class="bg-cardBg rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
-        <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-cardBgDark">
+      <!-- Cards Dinámicas de Rutinas -->
+      <div *ngFor="let rutina of rutinas" class="bg-[#212326]/75 backdrop-blur-md rounded-[28px] overflow-hidden border border-white/20 shadow-xl">
+        <div class="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
           <div>
-            <span class="text-[10px] px-2 py-1 rounded-md font-bold uppercase" [ngClass]="getCategoriaBadgeClass(rutina.categoria)">
+            <span class="text-[9px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider" [ngClass]="getCategoriaBadgeClass(rutina.categoria)">
               {{ rutina.categoria }}
             </span>
-            <h3 class="font-bold text-white mt-1">{{ rutina.titulo }}</h3>
+            <h3 class="font-bold text-white text-sm mt-1.5">{{ rutina.titulo }}</h3>
           </div>
           <button
             (click)="ejecutarRutina(rutina)"
             [disabled]="ejecutandoRutina"
-            class="text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg transition flex items-center gap-1.5 disabled:opacity-50"
-            [ngClass]="getBotonEjecutarClass(rutina.categoria)">
+            class="bg-[#0d0d0e] hover:bg-black active:scale-95 text-white px-4 py-2.5 rounded-full text-xs font-medium transition flex items-center gap-1.5 border border-white/10 disabled:opacity-40">
             <span *ngIf="!ejecutandoRutina || rutinaEnEjecucionId !== (rutina._id || rutina.titulo)">
-              Ejecutar <i class="fas fa-play ml-1"></i>
+              Ejecutar <i class="fas fa-play text-[10px] ml-1"></i>
             </span>
             <span *ngIf="ejecutandoRutina && rutinaEnEjecucionId === (rutina._id || rutina.titulo)">
               <i class="fas fa-spinner fa-spin mr-1"></i> En curso...
             </span>
           </button>
         </div>
+        
         <div class="p-4">
-          <p class="text-xs text-textMuted mb-3">Secuencia de movimientos:</p>
-          <div class="flex flex-wrap gap-2">
+          <p class="text-[11px] text-gray-400 mb-2.5">Secuencia de movimientos:</p>
+          <div class="flex flex-wrap gap-1.5">
             <span
               *ngFor="let paso of rutina.comandos; let i = index"
               [ngClass]="{
-                'bg-white text-black shadow-[0_0_10px_white]': rutinaEnEjecucionId === (rutina._id || rutina.titulo) && pasoActivoIndex === i,
-                'bg-accentWine text-white': rutinaEnEjecucionId === (rutina._id || rutina.titulo) && pasosCompletados[i] && pasoActivoIndex !== i,
-                'bg-gray-800 text-textMuted border border-gray-700': rutinaEnEjecucionId !== (rutina._id || rutina.titulo) || (!pasosCompletados[i] && pasoActivoIndex !== i)
+                'bg-white text-black shadow-md font-bold scale-105': rutinaEnEjecucionId === (rutina._id || rutina.titulo) && pasoActivoIndex === i,
+                'bg-gray-700 text-gray-200': rutinaEnEjecucionId === (rutina._id || rutina.titulo) && pasosCompletados[i] && pasoActivoIndex !== i,
+                'bg-black/40 text-gray-400 border border-white/5': rutinaEnEjecucionId !== (rutina._id || rutina.titulo) || (!pasosCompletados[i] && pasoActivoIndex !== i)
               }"
-              class="text-[10px] px-2 py-1 rounded-md uppercase font-bold transition-colors">
+              class="text-[10px] px-2.5 py-1 rounded-full uppercase font-medium transition-all">
               {{ paso }}
             </span>
           </div>
 
           <!-- Barra de progreso -->
-          <div class="w-full bg-gray-800 rounded-full h-1.5 mt-4 overflow-hidden">
+          <div class="w-full bg-black/40 rounded-full h-1.5 mt-4 overflow-hidden border border-white/5">
             <div
-              class="h-1.5 rounded-full transition-all duration-300"
-              [ngClass]="getProgresoColorClass(rutina.categoria)"
+              class="h-1.5 rounded-full bg-white transition-all duration-300"
               [style.width.%]="rutinaEnEjecucionId === (rutina._id || rutina.titulo) ? progresoActual : 0">
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Tarjeta Crear Nueva Secuencia (Única forma de abrir el modal) -->
-      <div (click)="abrirModalCrear()" class="border-2 border-dashed border-gray-800 hover:border-accentWine/50 rounded-2xl p-6 text-center cursor-pointer transition-colors group">
-        <p class="text-sm font-bold text-textMuted group-hover:text-accentWine transition-colors flex items-center justify-center gap-2">
+      <!-- Tarjeta para agregar nueva -->
+      <div (click)="abrirModalCrear()" class="border-2 border-dashed border-white/20 hover:border-white/50 rounded-[28px] p-5 text-center cursor-pointer transition-colors bg-black/10">
+        <p class="text-xs font-medium text-gray-300 flex items-center justify-center gap-2">
           <i class="fas fa-plus"></i> Crear Nueva Secuencia
         </p>
       </div>
@@ -184,41 +221,48 @@
     </div>
 
   </main>
+
+  <!-- Botón Flotante FAB en vista Rutinas -->
+  <ion-fab *ngIf="currentView === 'rutinas'" slot="fixed" vertical="bottom" horizontal="end" class="mb-6 mr-4">
+    <ion-fab-button (click)="abrirModalCrear()" style="--background: #ffffff; --color: #000000;" class="shadow-2xl">
+      <i class="fas fa-plus text-lg"></i>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>
 
-<!-- MODAL DE CREACIÓN DE NUEVA RUTINA -->
+<!-- ==================== MODAL CREAR RUTINA ==================== -->
 <ion-modal [isOpen]="isModalOpen" (didDismiss)="cerrarModal()">
   <ng-template>
-    <ion-header class="ion-no-border">
-      <ion-toolbar class="bg-appBg border-b border-gray-800 text-white px-4">
-        <ion-title class="text-base font-extrabold tracking-wider text-white">Crear Nueva Rutina</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="cerrarModal()" class="text-textMuted hover:text-white">
-            <i class="fas fa-times text-lg"></i>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
+    <div class="bg-[#1c1e21] min-h-full p-6 text-white flex flex-col justify-between space-y-6">
+      
+      <!-- Header Modal -->
+      <div class="flex justify-between items-center border-b border-white/10 pb-4">
+        <div>
+          <h2 class="text-base font-bold tracking-tight text-white">Crear Nueva Rutina</h2>
+          <p class="text-xs text-gray-400">Diseña una secuencia personalizada</p>
+        </div>
+        <button (click)="cerrarModal()" class="w-8 h-8 rounded-full bg-white/10 text-gray-300 hover:text-white flex items-center justify-center text-sm">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
 
-    <ion-content class="bg-appBg ion-padding">
-      <div class="space-y-4 max-w-xl mx-auto pb-6">
+      <!-- Body Modal -->
+      <div class="space-y-4 flex-1">
         
-        <!-- Campo: Título -->
         <div class="space-y-1.5">
-          <label class="text-xs text-textMuted uppercase font-bold tracking-wider">Título de la Rutina</label>
+          <label class="text-xs text-gray-300 font-semibold ml-1">Título de la Rutina</label>
           <input
             type="text"
             [(ngModel)]="nuevaRutinaTitulo"
             placeholder="Ej. Preparar café"
-            class="w-full bg-cardBg border border-gray-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-accentWine transition">
+            class="w-full bg-[#919396] text-gray-900 placeholder-gray-600 rounded-full px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-white/50 transition">
         </div>
 
-        <!-- Campo: Categoría -->
         <div class="space-y-1.5">
-          <label class="text-xs text-textMuted uppercase font-bold tracking-wider">Categoría</label>
+          <label class="text-xs text-gray-300 font-semibold ml-1">Categoría</label>
           <select
             [(ngModel)]="nuevaRutinaCategoria"
-            class="w-full bg-cardBg border border-gray-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-accentWine transition">
+            class="w-full bg-[#919396] text-gray-900 rounded-full px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-white/50 transition">
             <option value="ASISTENCIA MÉDICA">ASISTENCIA MÉDICA</option>
             <option value="USO INDUSTRIAL">USO INDUSTRIAL</option>
             <option value="PERSONALIZADA">PERSONALIZADA</option>
@@ -226,37 +270,35 @@
         </div>
 
         <!-- Constructor de Secuencia -->
-        <div class="bg-cardBg rounded-2xl p-4 border border-gray-800 space-y-3">
+        <div class="bg-black/30 rounded-[24px] p-4 border border-white/10 space-y-3">
           <div class="flex justify-between items-center">
-            <label class="text-xs text-textMuted uppercase font-bold tracking-wider">Construir Secuencia</label>
+            <label class="text-xs text-gray-300 font-semibold">Construir Secuencia</label>
             <button
               (click)="borrarUltimoComando()"
               [disabled]="nuevaRutinaComandos.length === 0"
-              class="text-xs text-red-400 hover:text-red-300 disabled:opacity-30 font-semibold flex items-center gap-1">
-              <i class="fas fa-undo"></i> Borrar último paso
+              class="text-xs text-red-400 hover:text-red-300 disabled:opacity-30 font-medium flex items-center gap-1">
+              <i class="fas fa-undo text-[10px]"></i> Deshacer
             </button>
           </div>
 
-          <!-- Cuadrícula de botones con comandos válidos -->
           <div class="grid grid-cols-3 gap-2">
             <button
               *ngFor="let cmd of comandosDisponibles"
               (click)="agregarComandoAFormulario(cmd)"
-              class="bg-cardBgDark hover:bg-gray-700 py-2.5 rounded-xl text-xs font-bold uppercase transition text-white border border-gray-700">
+              class="bg-[#0d0d0e] active:scale-95 py-2.5 rounded-full text-[11px] font-medium uppercase text-gray-200 border border-white/10">
               + {{ cmd }}
             </button>
           </div>
 
-          <!-- Secuencia Visual (Chips) -->
-          <div class="mt-3 pt-3 border-t border-gray-800">
-            <p class="text-[11px] text-textMuted mb-2">Pasos acumulados ({{ nuevaRutinaComandos.length }}):</p>
+          <div class="mt-3 pt-3 border-t border-white/10">
+            <p class="text-[11px] text-gray-400 mb-2">Pasos acumulados ({{ nuevaRutinaComandos.length }}):</p>
             <div *ngIf="nuevaRutinaComandos.length === 0" class="text-xs text-gray-500 italic">
-              Toca los botones superiores para ir agregando pasos.
+              Toca los botones para agregar movimientos.
             </div>
-            <div *ngIf="nuevaRutinaComandos.length > 0" class="flex flex-wrap gap-2">
+            <div *ngIf="nuevaRutinaComandos.length > 0" class="flex flex-wrap gap-1.5">
               <span
                 *ngFor="let paso of nuevaRutinaComandos; let idx = index"
-                class="bg-accentWine text-white text-[11px] px-2.5 py-1 rounded-md uppercase font-bold shadow">
+                class="bg-white text-gray-900 text-[10px] px-3 py-1 rounded-full font-bold shadow">
                 {{ idx + 1 }}. {{ paso }}
               </span>
             </div>
@@ -264,33 +306,32 @@
         </div>
 
       </div>
-    </ion-content>
 
-    <!-- Pie de página del modal con los botones de acción destacados -->
-    <ion-footer class="ion-no-border bg-appBg border-t border-gray-800 p-4">
-      <div class="grid grid-cols-2 gap-3 max-w-xl mx-auto">
+      <!-- Botones Acción Modal -->
+      <div class="grid grid-cols-2 gap-3 pt-3 border-t border-white/10">
         <button
           (click)="cerrarModal()"
-          class="bg-cardBgDark hover:bg-gray-700 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition">
+          class="bg-[#0d0d0e] text-gray-300 font-medium py-3.5 rounded-full text-xs uppercase tracking-wider border border-white/10">
           Cancelar
         </button>
         <button
           (click)="guardarNuevaRutina()"
           [disabled]="guardandoRutina || !nuevaRutinaTitulo.trim() || nuevaRutinaComandos.length === 0"
-          class="bg-accentWine hover:bg-pink-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg flex items-center justify-center gap-2">
-          <span *ngIf="!guardandoRutina">Guardar Rutina</span>
+          class="bg-white hover:bg-gray-200 disabled:opacity-40 text-gray-900 font-bold py-3.5 rounded-full text-xs uppercase tracking-wider transition shadow-lg flex items-center justify-center gap-2">
+          <span *ngIf="!guardandoRutina">Guardar</span>
           <span *ngIf="guardandoRutina"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
         </button>
       </div>
-    </ion-footer>
+
+    </div>
   </ng-template>
 </ion-modal>
 
-<!-- Toast de Notificación Personalizada -->
+<!-- Toast de Notificación -->
 <div
   [class.opacity-100]="showToast"
   [class.opacity-0]="!showToast"
-  class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-2xl transition-opacity duration-300 pointer-events-none z-50 flex items-center border border-gray-700">
-  <i class="fas fa-info-circle text-accentBlue mr-2"></i>
-  <span class="text-sm font-semibold">{{ toastMessage }}</span>
+  class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#0d0d0e]/90 backdrop-blur-md text-white px-5 py-2.5 rounded-full shadow-2xl transition-opacity duration-300 pointer-events-none z-50 flex items-center border border-white/20">
+  <i class="fas fa-info-circle text-pink-400 mr-2 text-xs"></i>
+  <span class="text-xs font-medium">{{ toastMessage }}</span>
 </div>
