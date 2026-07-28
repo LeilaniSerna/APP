@@ -36,19 +36,18 @@ const userSchema = new mongoose.Schema({
 });
 
 // Hook pre-save para hashear la contraseña automáticamente
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
   const user = this;
 
   // Solo hashear la contraseña si es nueva o ha sido modificada
-  if (!user.isModified('password')) return next();
+  if (!user.isModified('password')) return;
 
   try {
     // Generar la sal y hashear el password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(user.password, salt);
-    next();
   } catch (err) {
-    next(err);
+    throw err;
   }
 });
 

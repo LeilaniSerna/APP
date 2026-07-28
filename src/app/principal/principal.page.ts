@@ -323,7 +323,8 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       this.pasoActivoIndex = i;
       this.progresoActual = ((i + 1) / rutina.comandos.length) * 100;
 
-      this.simulateVoice(comando.toUpperCase());
+      this.applyCommand(comando.toUpperCase());
+      await this.voiceService.sendToEsp32(comando.toLowerCase());
 
       await new Promise((r) => setTimeout(r, 1500));
 
@@ -437,5 +438,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   simulateVoice(cmd: string) {
     this.applyCommand(cmd);
+    this.voiceService.sendToEsp32(cmd.toLowerCase());
   }
 }

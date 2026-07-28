@@ -124,15 +124,15 @@ export class VoiceService {
     }
   }
 
-  // Enviar comando reconocido al ESP32
-  private async sendToEsp32(comando: string) {
+  // Enviar comando al ESP32
+  async sendToEsp32(comando: string) {
     try {
       await firstValueFrom(
         this.http.post(`${ESP32_URL}/comando`, { comando }, { responseType: 'text' })
       );
     } catch (err) {
       // El ESP32 puede estar apagado — notificamos sin interrumpir el flujo visual
-      this.setStatus('error', `IA clasificó (${comando.toUpperCase()}) pero el brazo no respondió. ¿Está encendido?`);
+      this.setStatus('error', `No se pudo enviar el comando (${comando.toUpperCase()}) al brazo. ¿Está encendido?`);
     }
   }
 
