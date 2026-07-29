@@ -58,5 +58,8 @@
   "NO_VOZ": "No speech detected, try again",
   "BAJA_CERTEZA": "Command not recognized with sufficient certainty ({pct}%). Try again.",
   "NAVEGADOR_NO_SOPORTADO": "Your browser does not support speech recognition. Use Chrome or Edge.",
-  "ERROR_MIC": "Microphone error: {error}"
+  "ERROR_MIC": "Microphone error: {error}",
+  "CONSOLA_MONITOREO": "Monitoring Console",
+  "LIMPIAR": "Clear",
+  "ESPERANDO_EVENTOS": "Waiting for system events..."
 }

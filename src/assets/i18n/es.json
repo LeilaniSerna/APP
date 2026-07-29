@@ -58,5 +58,8 @@
   "NO_VOZ": "No se detectó voz, intenta de nuevo",
   "BAJA_CERTEZA": "Comando no reconocido con certeza suficiente ({pct}%). Intenta de nuevo.",
   "NAVEGADOR_NO_SOPORTADO": "Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.",
-  "ERROR_MIC": "Error de micrófono: {error}"
+  "ERROR_MIC": "Error de micrófono: {error}",
+  "CONSOLA_MONITOREO": "Consola de Monitoreo",
+  "LIMPIAR": "Limpiar",
+  "ESPERANDO_EVENTOS": "Esperando eventos del sistema..."
 }

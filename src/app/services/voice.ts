@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
 import { LanguageService } from './language.service';
 
 // IP del ESP32 en la red local
@@ -25,6 +25,11 @@ export interface IAResponse {
   error?: string;
 }
 
+export interface LogMessage {
+  mensaje: string;
+  tipo: 'info' | 'success' | 'warning' | 'error' | 'esp32';
+}
+
 @Injectable({ providedIn: 'root' })
 export class VoiceService {
   private recognition: any = null;
@@ -34,6 +39,11 @@ export class VoiceService {
   status$ = new BehaviorSubject<VoiceStatus>('idle');
   lastCommand$ = new BehaviorSubject<string>('');
   statusMessage$ = new BehaviorSubject<string>('Presiona el micrófono para hablar');
+  log$ = new Subject<LogMessage>();
+
+  private emitLog(mensaje: string, tipo: 'info' | 'success' | 'warning' | 'error' | 'esp32' = 'info') {
+    this.log$.next({ mensaje, tipo });
+  }
 
   private http = inject(HttpClient);
   private langService = inject(LanguageService);
@@ -150,11 +160,14 @@ export class VoiceService {
   // Enviar comando al ESP32
   async sendToEsp32(comando: string) {
     try {
+      this.emitLog(`ESP32: Enviando comando (${comando.toUpperCase()}) a ${ESP32_URL}...`, 'info');
       await firstValueFrom(
         this.http.post(`${ESP32_URL}/comando`, { comando }, { responseType: 'text' })
       );
+      this.emitLog(`ESP32: Comando (${comando.toUpperCase()}) ejecutado exitosamente`, 'success');
     } catch (err) {
       // El ESP32 puede estar apagado — notificamos sin interrumpir el flujo visual
+      this.emitLog(`ESP32 Error: No se pudo conectar al dispositivo`, 'error');
       this.setStatus('error', this.langService.translate('ERROR_ENVIO_BRAZO').replace('{cmd}', comando.toUpperCase()));
     }
   }

@@ -93,6 +93,13 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   showToast = false;
   toastMessage = '';
 
+  // Consola de Logs en tiempo real
+  logs: Array<{
+    timestamp: string;
+    mensaje: string;
+    tipo: 'info' | 'success' | 'warning' | 'error' | 'esp32';
+  }> = [];
+
   private subs = new Subscription();
 
   public voiceService = inject(VoiceService);
@@ -104,19 +111,55 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     addIcons({ mic, micOutline, optionsOutline, addOutline, closeOutline, backspaceOutline });
 
     this.subs.add(
-      this.voiceService.status$.subscribe((s) => (this.voiceStatus = s))
+      this.voiceService.status$.subscribe((s) => {
+        this.voiceStatus = s;
+        if (s === 'listening') {
+          this.agregarLog('Voz: Micrófono activo - Escuchando voz...', 'info');
+        } else if (s === 'processing') {
+          this.agregarLog('Voz: Procesando audio...', 'info');
+        }
+      })
     );
     this.subs.add(
       this.voiceService.statusMessage$.subscribe((m) => (this.statusMessage = m))
     );
     this.subs.add(
       this.voiceService.lastCommand$.subscribe((cmd) => {
-        if (cmd) this.applyCommand(cmd);
+        if (cmd) {
+          this.agregarLog(`Voz: Comando clasificado -> ${cmd}`, 'success');
+          this.applyCommand(cmd);
+        }
+      })
+    );
+    this.subs.add(
+      this.voiceService.log$.subscribe((log) => {
+        this.agregarLog(log.mensaje, log.tipo);
       })
     );
   }
 
+  agregarLog(mensaje: string, tipo: 'info' | 'success' | 'warning' | 'error' | 'esp32' = 'info') {
+    const ahora = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const timestamp = `${pad(ahora.getHours())}:${pad(ahora.getMinutes())}:${pad(ahora.getSeconds())}`;
+    this.logs.push({ timestamp, mensaje, tipo });
+    if (this.logs.length > 50) {
+      this.logs.shift();
+    }
+    setTimeout(() => {
+      const el = document.getElementById('log-terminal');
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+      }
+    }, 50);
+  }
+
+  limpiarLogs() {
+    this.logs = [];
+  }
+
   ngOnInit() {
+    this.agregarLog('Consola de Monitoreo A-ARM inicializada. Listo.', 'info');
     this.cargarRutinas();
   }
 
@@ -313,10 +356,12 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   // --- GESTOR DE RUTINAS DINÁMICO ---
   async ejecutarRutina(rutina: Routine) {
     if (this.ejecutandoRutina) {
+      this.agregarLog('Rutinas: Error - Ya hay una rutina en ejecución', 'warning');
       this.mostrarToast(this.langService.translate('YA_HAY_RUTINA'));
       return;
     }
 
+    this.agregarLog(`Rutinas: Iniciando rutina "${rutina.titulo}"...`, 'info');
     this.ejecutandoRutina = true;
     this.rutinaEnEjecucionId = rutina._id || rutina.titulo;
     this.pasosCompletados = new Array(rutina.comandos.length).fill(false);
@@ -327,6 +372,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       this.pasoActivoIndex = i;
       this.progresoActual = ((i + 1) / rutina.comandos.length) * 100;
 
+      this.agregarLog(`Rutinas [Paso ${i + 1}/${rutina.comandos.length}]: ${comando.toUpperCase()}`, 'esp32');
       this.applyCommand(comando.toUpperCase());
       await this.voiceService.sendToEsp32(comando.toLowerCase());
 
@@ -335,6 +381,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       this.pasosCompletados[i] = true;
     }
 
+    this.agregarLog(`Rutinas: Rutina "${rutina.titulo}" completada con éxito`, 'success');
     this.mostrarToast(this.langService.translate('RUTINA_COMPLETADA'));
     this.ejecutandoRutina = false;
     this.rutinaEnEjecucionId = null;
@@ -395,6 +442,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   applyCommand(cmd: string) {
     const upperCmd = cmd.toUpperCase();
+    this.agregarLog(`Simulación: Aplicando comando ${upperCmd}`, 'info');
     this.robotState = `Ejecutando: ${upperCmd}`;
     this.robotColor = 'text-accentWine';
     this.registrarConsumo(2.5);
@@ -453,6 +501,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   simulateVoice(cmd: string) {
+    this.agregarLog(`Manual: Botón presionado -> ${cmd.toUpperCase()}`, 'info');
     this.applyCommand(cmd);
     this.voiceService.sendToEsp32(cmd.toLowerCase());
   }

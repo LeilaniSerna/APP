@@ -74,6 +74,33 @@
         </div>
       </div>
 
+      <!-- Tarjeta: Consola de Monitoreo (Terminal Log) -->
+      <div class="bg-cardBg rounded-2xl p-5 shadow-lg border border-gray-800/50 space-y-3">
+        <div class="flex justify-between items-center">
+          <h3 class="text-xs font-bold text-textMuted uppercase tracking-wider">{{ 'CONSOLA_MONITOREO' | translate }}</h3>
+          <button (click)="limpiarLogs()" class="text-[10px] text-accentWine hover:text-pink-500 font-bold uppercase transition-colors">
+            {{ 'LIMPIAR' | translate }}
+          </button>
+        </div>
+        <div id="log-terminal" class="h-36 bg-gray-950/90 rounded-xl p-3 font-mono text-[10px] overflow-y-auto space-y-1.5 border border-gray-850">
+          <div *ngIf="logs.length === 0" class="text-gray-600 italic">
+            {{ 'ESPERANDO_EVENTOS' | translate }}
+          </div>
+          <div *ngFor="let log of logs" class="leading-relaxed flex items-start gap-1">
+            <span class="text-gray-500 font-semibold">[{{ log.timestamp }}]</span>
+            <span [ngClass]="{
+              'text-blue-400': log.tipo === 'info',
+              'text-green-400': log.tipo === 'success',
+              'text-yellow-500': log.tipo === 'warning',
+              'text-red-400': log.tipo === 'error',
+              'text-purple-400': log.tipo === 'esp32'
+            }">
+              {{ log.mensaje }}
+            </span>
+          </div>
+        </div>
+      </div>
+
       <!-- Tarjeta Control de Voz -->
       <div class="bg-cardBg rounded-2xl p-5 shadow-lg border border-gray-800/50">
         <h3 class="text-xs font-bold text-textMuted mb-3 uppercase tracking-wider">{{ 'CONTROL_VOZ' | translate }}</h3>
