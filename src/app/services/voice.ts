@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 // IP del ESP32 en la red local
-const ESP32_URL = 'http://192.168.120.43';
+const ESP32_URL = 'http://192.168.100.52';
 
 // URL Pública de la API del Backend de IA en Vercel (Modelo ONNX CNN)
 const IA_BACKEND_URL = 'https://brazo-backend.vercel.app/api/comando';
