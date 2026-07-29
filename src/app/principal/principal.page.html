@@ -29,7 +29,7 @@
         <div class="flex justify-between items-start mb-4">
           <div>
             <h3 class="text-xs font-bold text-textMuted uppercase">{{ 'ESTADO' | translate }}</h3>
-            <h2 class="text-accentWine text-xl font-bold tracking-widest uppercase" [ngClass]="robotColor">{{ robotState }}</h2>
+            <h2 class="text-accentWine text-xl font-bold tracking-widest uppercase" [ngClass]="robotColor">{{ translatedRobotState }}</h2>
           </div>
           <div class="text-right">
             <p class="text-xs font-bold text-gray-400">12V DC</p>
@@ -95,7 +95,7 @@
               'text-red-400': log.tipo === 'error',
               'text-purple-400': log.tipo === 'esp32'
             }">
-              {{ log.mensaje }}
+              {{ getLogMensaje(log) }}
             </span>
           </div>
         </div>

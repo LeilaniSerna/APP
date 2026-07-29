@@ -61,5 +61,22 @@
   "ERROR_MIC": "Microphone error: {error}",
   "CONSOLA_MONITOREO": "Monitoring Console",
   "LIMPIAR": "Clear",
-  "ESPERANDO_EVENTOS": "Waiting for system events..."
+  "ESPERANDO_EVENTOS": "Waiting for system events...",
+  "EN ESPERA": "STANDBY",
+  "DETENIDO": "STOPPED",
+  "MODO PRUEBA": "TEST MODE",
+  "EJECUTANDO": "EXECUTING",
+  "LOG_INICIALIZADO": "A-ARM Monitoring Console initialized. Ready.",
+  "LOG_MIC_ACTIVO": "Voice: Microphone active - Listening for voice...",
+  "LOG_PROCESANDO_AUDIO": "Voice: Processing audio...",
+  "LOG_VOZ_COMANDO": "Voice: Classified command -> {cmd}",
+  "LOG_MANUAL_BOTON": "Manual: Button pressed -> {cmd}",
+  "LOG_SIMULACION_COMANDO": "Simulation: Applying command {cmd}",
+  "LOG_RUTINA_INICIO": "Routines: Starting routine \"{titulo}\"...",
+  "LOG_RUTINA_PASO": "Routines [Step {paso}/{total}]: {cmd}",
+  "LOG_RUTINA_FIN": "Routines: Routine \"{titulo}\" completed successfully",
+  "LOG_RUTINA_ERROR_EJECUCION": "Routines: Error - A routine is already running",
+  "LOG_ESP32_ENVIANDO": "ESP32: Sending command ({cmd}) to {url}...",
+  "LOG_ESP32_EXITO": "ESP32: Command ({cmd}) executed successfully",
+  "LOG_ESP32_ERROR": "ESP32 Error: Could not connect to device"
 }

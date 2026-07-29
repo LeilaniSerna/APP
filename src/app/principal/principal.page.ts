@@ -98,6 +98,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     timestamp: string;
     mensaje: string;
     tipo: 'info' | 'success' | 'warning' | 'error' | 'esp32';
+    parametros?: Record<string, string>;
   }> = [];
 
   private subs = new Subscription();
@@ -107,6 +108,14 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   private router = inject(Router);
   public langService = inject(LanguageService);
 
+  get translatedRobotState(): string {
+    if (this.robotState.startsWith('Ejecutando: ')) {
+      const cmd = this.robotState.replace('Ejecutando: ', '').toUpperCase();
+      return `${this.langService.translate('EJECUTANDO')}: ${this.langService.translate(cmd)}`;
+    }
+    return this.langService.translate(this.robotState);
+  }
+
   constructor() {
     addIcons({ mic, micOutline, optionsOutline, addOutline, closeOutline, backspaceOutline });
 
@@ -114,9 +123,9 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       this.voiceService.status$.subscribe((s) => {
         this.voiceStatus = s;
         if (s === 'listening') {
-          this.agregarLog('Voz: Micrófono activo - Escuchando voz...', 'info');
+          this.agregarLog('LOG_MIC_ACTIVO', 'info');
         } else if (s === 'processing') {
-          this.agregarLog('Voz: Procesando audio...', 'info');
+          this.agregarLog('LOG_PROCESANDO_AUDIO', 'info');
         }
       })
     );
@@ -126,23 +135,23 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     this.subs.add(
       this.voiceService.lastCommand$.subscribe((cmd) => {
         if (cmd) {
-          this.agregarLog(`Voz: Comando clasificado -> ${cmd}`, 'success');
+          this.agregarLog('LOG_VOZ_COMANDO', 'success', { cmd });
           this.applyCommand(cmd);
         }
       })
     );
     this.subs.add(
       this.voiceService.log$.subscribe((log) => {
-        this.agregarLog(log.mensaje, log.tipo);
+        this.agregarLog(log.mensaje, log.tipo, log.parametros);
       })
     );
   }
 
-  agregarLog(mensaje: string, tipo: 'info' | 'success' | 'warning' | 'error' | 'esp32' = 'info') {
+  agregarLog(mensaje: string, tipo: 'info' | 'success' | 'warning' | 'error' | 'esp32' = 'info', parametros?: Record<string, string>) {
     const ahora = new Date();
     const pad = (n: number) => n.toString().padStart(2, '0');
     const timestamp = `${pad(ahora.getHours())}:${pad(ahora.getMinutes())}:${pad(ahora.getSeconds())}`;
-    this.logs.push({ timestamp, mensaje, tipo });
+    this.logs.push({ timestamp, mensaje, tipo, parametros });
     if (this.logs.length > 50) {
       this.logs.shift();
     }
@@ -154,12 +163,22 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     }, 50);
   }
 
+  getLogMensaje(log: any): string {
+    let msg = this.langService.translate(log.mensaje);
+    if (log.parametros) {
+      for (const key of Object.keys(log.parametros)) {
+        msg = msg.replace(`{${key}}`, this.langService.translate(log.parametros[key]));
+      }
+    }
+    return msg;
+  }
+
   limpiarLogs() {
     this.logs = [];
   }
 
   ngOnInit() {
-    this.agregarLog('Consola de Monitoreo A-ARM inicializada. Listo.', 'info');
+    this.agregarLog('LOG_INICIALIZADO', 'info');
     this.cargarRutinas();
   }
 
@@ -356,12 +375,12 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   // --- GESTOR DE RUTINAS DINÁMICO ---
   async ejecutarRutina(rutina: Routine) {
     if (this.ejecutandoRutina) {
-      this.agregarLog('Rutinas: Error - Ya hay una rutina en ejecución', 'warning');
+      this.agregarLog('LOG_RUTINA_ERROR_EJECUCION', 'warning');
       this.mostrarToast(this.langService.translate('YA_HAY_RUTINA'));
       return;
     }
 
-    this.agregarLog(`Rutinas: Iniciando rutina "${rutina.titulo}"...`, 'info');
+    this.agregarLog('LOG_RUTINA_INICIO', 'info', { titulo: rutina.titulo });
     this.ejecutandoRutina = true;
     this.rutinaEnEjecucionId = rutina._id || rutina.titulo;
     this.pasosCompletados = new Array(rutina.comandos.length).fill(false);
@@ -372,7 +391,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       this.pasoActivoIndex = i;
       this.progresoActual = ((i + 1) / rutina.comandos.length) * 100;
 
-      this.agregarLog(`Rutinas [Paso ${i + 1}/${rutina.comandos.length}]: ${comando.toUpperCase()}`, 'esp32');
+      this.agregarLog('LOG_RUTINA_PASO', 'esp32', { paso: (i + 1).toString(), total: rutina.comandos.length.toString(), cmd: comando.toUpperCase() });
       this.applyCommand(comando.toUpperCase());
       await this.voiceService.sendToEsp32(comando.toLowerCase());
 
@@ -381,7 +400,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       this.pasosCompletados[i] = true;
     }
 
-    this.agregarLog(`Rutinas: Rutina "${rutina.titulo}" completada con éxito`, 'success');
+    this.agregarLog('LOG_RUTINA_FIN', 'success', { titulo: rutina.titulo });
     this.mostrarToast(this.langService.translate('RUTINA_COMPLETADA'));
     this.ejecutandoRutina = false;
     this.rutinaEnEjecucionId = null;
@@ -442,7 +461,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   applyCommand(cmd: string) {
     const upperCmd = cmd.toUpperCase();
-    this.agregarLog(`Simulación: Aplicando comando ${upperCmd}`, 'info');
+    this.agregarLog('LOG_SIMULACION_COMANDO', 'info', { cmd: upperCmd });
     this.robotState = `Ejecutando: ${upperCmd}`;
     this.robotColor = 'text-accentWine';
     this.registrarConsumo(2.5);
@@ -501,7 +520,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   simulateVoice(cmd: string) {
-    this.agregarLog(`Manual: Botón presionado -> ${cmd.toUpperCase()}`, 'info');
+    this.agregarLog('LOG_MANUAL_BOTON', 'info', { cmd: cmd.toUpperCase() });
     this.applyCommand(cmd);
     this.voiceService.sendToEsp32(cmd.toLowerCase());
   }
