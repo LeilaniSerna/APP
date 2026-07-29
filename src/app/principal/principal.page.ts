@@ -1,4 +1,4 @@
-import { Component, OnDestroy, AfterViewInit, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, AfterViewInit, OnInit, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -92,11 +92,11 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   private subs = new Subscription();
 
-  constructor(
-    public voiceService: VoiceService,
-    private routineService: RoutineService,
-    private router: Router
-  ) {
+  public voiceService = inject(VoiceService);
+  private routineService = inject(RoutineService);
+  private router = inject(Router);
+
+  constructor() {
     addIcons({ mic, micOutline, optionsOutline, addOutline, closeOutline, backspaceOutline });
 
     this.subs.add(

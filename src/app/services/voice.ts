@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
@@ -34,7 +34,9 @@ export class VoiceService {
   lastCommand$ = new BehaviorSubject<string>('');
   statusMessage$ = new BehaviorSubject<string>('Presiona el micrófono para hablar');
 
-  constructor(private http: HttpClient) {
+  private http = inject(HttpClient);
+
+  constructor() {
     this.initRecognition();
   }
 
