@@ -95,6 +95,25 @@ export class VoiceService {
   // Enviar el texto reconocido al backend de Inteligencia Artificial (ONNX CNN)
   private async sendToIABackend(texto: string) {
     try {
+      const normalizedText = (texto || '').toLowerCase().trim();
+
+      // Interceptar comandos especiales (bypass de la IA)
+      if (normalizedText.includes('reposo') || normalizedText.includes('reposar')) {
+        const cmd = 'REPOSO';
+        this.lastCommand$.next(cmd);
+        this.setStatus('success', `Comando directo: ${cmd}`);
+        await this.sendToEsp32(cmd.toLowerCase());
+        return;
+      }
+
+      if (normalizedText.includes('prueba') || normalizedText.includes('probar')) {
+        const cmd = 'PRUEBA';
+        this.lastCommand$.next(cmd);
+        this.setStatus('success', `Comando directo: ${cmd}`);
+        await this.sendToEsp32(cmd.toLowerCase());
+        return;
+      }
+
       const response: IAResponse = await firstValueFrom(
         this.http.post<IAResponse>(IA_BACKEND_URL, { texto })
       );

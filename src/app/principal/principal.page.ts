@@ -422,18 +422,30 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       case 'DERECHA':
         this.arm1 = 'rotate(-30deg)';
         break;
+      case 'REPOSO':
+        this.gripT = 'translateY(0px)';
+        this.gripB = 'translateY(0px)';
+        this.glassOp = 'opacity-100';
+        this.arm1 = 'rotate(-45deg)';
+        this.arm2 = 'rotate(70deg)';
+        break;
+      case 'PRUEBA':
+        this.robotState = 'MODO PRUEBA';
+        this.robotColor = 'text-green-400';
+        break;
       case 'ALTO':
         this.robotState = 'DETENIDO';
         this.robotColor = 'text-red-400';
         break;
     }
 
+    const stateDelay = upperCmd === 'PRUEBA' ? 15000 : 1000;
     setTimeout(() => {
       if (this.robotState !== 'DETENIDO') {
         this.robotState = 'EN ESPERA';
         this.registrarConsumo(0.2);
       }
-    }, 1000);
+    }, stateDelay);
   }
 
   simulateVoice(cmd: string) {
