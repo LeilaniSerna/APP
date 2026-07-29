@@ -1,9 +1,9 @@
 <ion-header class="ion-no-border">
   <ion-toolbar class="bg-bgDark border-b border-borderBrand/30 text-textLight px-2">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home" text="Volver" class="text-brandLight"></ion-back-button>
+      <ion-back-button defaultHref="/home" [text]="'VOLVER' | translate" class="text-brandLight"></ion-back-button>
     </ion-buttons>
-    <ion-title class="text-sm font-black tracking-wider text-textLight">AJUSTES Y PERFIL</ion-title>
+    <ion-title class="text-sm font-black tracking-wider text-textLight">{{ 'AJUSTES_PERFIL' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -13,8 +13,8 @@
     <!-- Encabezado de la Página -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-black tracking-tight text-textLight">Ajustes y Perfil</h1>
-        <p class="text-xs text-textLight/60">Gestión de usuario, contacto de emergencia y dispositivo</p>
+        <h1 class="text-xl font-black tracking-tight text-textLight">{{ 'AJUSTES_PERFIL' | translate }}</h1>
+        <p class="text-xs text-textLight/60">{{ 'GESTION_USUARIO' | translate }}</p>
       </div>
       <span class="text-xs bg-brandDeep/40 border border-brandLight/40 text-brandLight px-3 py-1 rounded-full font-bold">
         A-ARM v1.0
@@ -24,14 +24,14 @@
     <!-- Mensaje de confirmación de guardado -->
     <div *ngIf="saveSuccess" class="bg-green-500/20 border border-green-500/50 text-green-300 p-3 rounded-2xl text-xs flex items-center gap-2">
       <ion-icon name="checkmark-circle-outline" class="text-lg"></ion-icon>
-      <span>¡Perfil y ajustes guardados correctamente!</span>
+      <span>{{ 'GUARDADO_CORRECTO' | translate }}</span>
     </div>
 
     <!-- Tarjeta 1: Perfil de Usuario con Foto -->
     <div class="bg-bgCard border border-borderBrand p-6 rounded-3xl shadow-xl space-y-5">
       <h2 class="text-xs font-bold text-textLight/60 uppercase tracking-wider flex items-center gap-2">
         <ion-icon name="person-outline" class="text-brandLight text-base"></ion-icon>
-        Perfil de Usuario
+        {{ 'PERFIL_USUARIO' | translate }}
       </h2>
 
       <!-- Selección de Foto de Perfil -->
@@ -48,24 +48,24 @@
             <input type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)">
           </label>
         </div>
-        <p class="text-[10px] text-textLight/50">Toca el icono de cámara para subir una foto de perfil</p>
+        <p class="text-[10px] text-textLight/50">{{ 'FOTO_INSTRUCCION' | translate }}</p>
       </div>
 
       <!-- Campos de texto del perfil -->
       <div class="space-y-3">
         <div class="space-y-1">
-          <label class="text-[10px] text-textLight/60 uppercase font-bold">Nombre Completo</label>
+          <label class="text-[10px] text-textLight/60 uppercase font-bold">{{ 'NOMBRE_COMPLETO' | translate }}</label>
           <input type="text" [(ngModel)]="nombre" class="w-full bg-bgDark border border-borderBrand rounded-2xl px-4 py-2.5 text-xs text-textLight outline-none focus:border-brandLight">
         </div>
 
         <div class="space-y-1">
-          <label class="text-[10px] text-textLight/60 uppercase font-bold">Correo Electrónico</label>
+          <label class="text-[10px] text-textLight/60 uppercase font-bold">{{ 'CORREO_ELECTRONICO' | translate }}</label>
           <input type="email" [value]="email" disabled class="w-full bg-bgDark/40 border border-borderBrand/30 rounded-2xl px-4 py-2.5 text-xs text-textLight/50 cursor-not-allowed">
         </div>
 
         <div class="space-y-1">
-          <label class="text-[10px] text-textLight/60 uppercase font-bold">Especialidad / Cargo</label>
-          <input type="text" [(ngModel)]="especialidad" placeholder="Ej. Cirujano Robótico" class="w-full bg-bgDark border border-borderBrand rounded-2xl px-4 py-2.5 text-xs text-textLight outline-none focus:border-brandLight">
+          <label class="text-[10px] text-textLight/60 uppercase font-bold">{{ 'ESPECIALIDAD_CARGO' | translate }}</label>
+          <input type="text" [(ngModel)]="especialidad" class="w-full bg-bgDark border border-borderBrand rounded-2xl px-4 py-2.5 text-xs text-textLight outline-none focus:border-brandLight">
         </div>
       </div>
     </div>
@@ -74,23 +74,23 @@
     <div class="bg-bgCard border border-borderBrand p-6 rounded-3xl shadow-xl space-y-4">
       <h2 class="text-xs font-bold text-textLight/60 uppercase tracking-wider flex items-center gap-2">
         <ion-icon name="call-outline" class="text-red-400 text-base"></ion-icon>
-        Contacto de Emergencia
+        {{ 'CONTACTO_EMERGENCIA' | translate }}
       </h2>
 
       <div class="space-y-3">
         <div class="space-y-1">
-          <label class="text-[10px] text-textLight/60 uppercase font-bold">Nombre del Contacto</label>
+          <label class="text-[10px] text-textLight/60 uppercase font-bold">{{ 'NOMBRE_CONTACTO' | translate }}</label>
           <input type="text" [(ngModel)]="contactoNombre" placeholder="Ej. Dra. María González" class="w-full bg-bgDark border border-borderBrand rounded-2xl px-4 py-2.5 text-xs text-textLight outline-none focus:border-brandLight">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="space-y-1">
-            <label class="text-[10px] text-textLight/60 uppercase font-bold">Teléfono de Emergencia</label>
+            <label class="text-[10px] text-textLight/60 uppercase font-bold">{{ 'TELEFONO_EMERGENCIA' | translate }}</label>
             <input type="tel" [(ngModel)]="contactoTelefono" placeholder="Ej. +52 55 1234 5678" class="w-full bg-bgDark border border-borderBrand rounded-2xl px-4 py-2.5 text-xs text-textLight outline-none focus:border-brandLight">
           </div>
 
           <div class="space-y-1">
-            <label class="text-[10px] text-textLight/60 uppercase font-bold">Parentesco / Rol</label>
+            <label class="text-[10px] text-textLight/60 uppercase font-bold">{{ 'PARENTESCO_ROL' | translate }}</label>
             <input type="text" [(ngModel)]="contactoRelacion" placeholder="Ej. Médico de Guardia" class="w-full bg-bgDark border border-borderBrand rounded-2xl px-4 py-2.5 text-xs text-textLight outline-none focus:border-brandLight">
           </div>
         </div>
@@ -101,15 +101,33 @@
     <div class="bg-bgCard border border-borderBrand p-6 rounded-3xl shadow-xl space-y-4">
       <h2 class="text-xs font-bold text-textLight/60 uppercase tracking-wider flex items-center gap-2">
         <ion-icon name="hardware-chip-outline" class="text-brandLight text-base"></ion-icon>
-        Ajustes del Brazo (12V DC)
+        {{ 'AJUSTES_BRAZO' | translate }}
       </h2>
 
       <div class="space-y-3">
         <div class="flex justify-between items-center text-xs font-semibold text-textLight">
-          <span class="opacity-80">Presión de Agarre</span>
+          <span class="opacity-80">{{ 'PRESION_AGARRE' | translate }}</span>
           <span class="text-brandLight font-bold bg-brandDeep/30 border border-brandLight/40 px-3 py-1 rounded-xl text-xs">{{ forceLabel }}</span>
         </div>
         <input type="range" min="15" max="100" [(ngModel)]="forceValue" class="w-full h-2 bg-bgDark rounded-lg appearance-none accent-brandLight cursor-pointer">
+      </div>
+    </div>
+
+    <!-- Tarjeta 4: Selector de Idioma / Language Selector -->
+    <div class="bg-bgCard border border-borderBrand p-6 rounded-3xl shadow-xl space-y-4">
+      <h2 class="text-xs font-bold text-textLight/60 uppercase tracking-wider flex items-center gap-2">
+        <ion-icon name="globe-outline" class="text-brandLight text-base"></ion-icon>
+        {{ 'IDIOMA' | translate }}
+      </h2>
+
+      <div class="space-y-3">
+        <div class="flex justify-between items-center text-xs font-semibold text-textLight">
+          <span class="opacity-80">{{ 'SELECCIONAR_IDIOMA' | translate }}</span>
+          <select [ngModel]="selectedLang" (ngModelChange)="changeLanguage($event)" class="bg-bgDark border border-borderBrand rounded-xl px-3 py-2 text-xs text-textLight outline-none">
+            <option value="es">Español</option>
+            <option value="en">English</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -117,12 +135,12 @@
     <div class="space-y-3 pt-2">
       <button (click)="guardarPerfil()" class="w-full bg-gradient-to-r from-brandDeep to-brandLight text-white text-xs font-extrabold py-4 rounded-2xl shadow-lg hover:opacity-90 flex items-center justify-center gap-2">
         <ion-icon name="save-outline" class="text-base"></ion-icon>
-        GUARDAR CAMBIOS
+        {{ 'GUARDAR_CAMBIOS' | translate }}
       </button>
 
       <button (click)="handleLogout()" class="w-full bg-bgDark/80 text-red-400 border border-red-500/30 text-xs font-extrabold py-4 rounded-2xl hover:bg-red-500/10 flex items-center justify-center gap-2">
         <ion-icon name="log-out-outline" class="text-base"></ion-icon>
-        CERRAR SESIÓN DEL PORTAL MÉDICO
+        {{ 'CERRAR_SESION' | translate }}
       </button>
     </div>
 

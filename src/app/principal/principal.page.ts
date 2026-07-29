@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { VoiceService, VoiceStatus } from '../services/voice';
 import { RoutineService, Routine } from '../services/routine.service';
+import { LanguageService } from '../services/language.service';
+import { TranslatePipe } from '../pipes/translate.pipe';
 import { addIcons } from 'ionicons';
 import { mic, micOutline, optionsOutline, addOutline, closeOutline, backspaceOutline } from 'ionicons/icons';
 import {
@@ -39,6 +41,7 @@ declare const Chart: any;
     IonIcon,
     IonFabButton,
     IonModal,
+    TranslatePipe
   ],
 })
 export class HomePage implements OnInit, OnDestroy, AfterViewInit {
@@ -95,6 +98,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   public voiceService = inject(VoiceService);
   private routineService = inject(RoutineService);
   private router = inject(Router);
+  public langService = inject(LanguageService);
 
   constructor() {
     addIcons({ mic, micOutline, optionsOutline, addOutline, closeOutline, backspaceOutline });
@@ -309,7 +313,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   // --- GESTOR DE RUTINAS DINÁMICO ---
   async ejecutarRutina(rutina: Routine) {
     if (this.ejecutandoRutina) {
-      this.mostrarToast('Ya hay una rutina en ejecución');
+      this.mostrarToast(this.langService.translate('YA_HAY_RUTINA'));
       return;
     }
 
@@ -331,7 +335,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       this.pasosCompletados[i] = true;
     }
 
-    this.mostrarToast('Rutina completada con éxito');
+    this.mostrarToast(this.langService.translate('RUTINA_COMPLETADA'));
     this.ejecutandoRutina = false;
     this.rutinaEnEjecucionId = null;
     this.pasoActivoIndex = -1;

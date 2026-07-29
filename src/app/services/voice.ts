@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { LanguageService } from './language.service';
 
 // IP del ESP32 en la red local
 const ESP32_URL = 'http://192.168.100.52';
 
-// URL Pública de la API del Backend de IA en Vercel (Modelo ONNX CNN)
+
 const IA_BACKEND_URL = 'https://brazo-backend.vercel.app/api/comando';
 
 export type VoiceStatus =
@@ -35,6 +36,7 @@ export class VoiceService {
   statusMessage$ = new BehaviorSubject<string>('Presiona el micrófono para hablar');
 
   private http = inject(HttpClient);
+  private langService = inject(LanguageService);
 
   constructor() {
     this.initRecognition();
@@ -46,7 +48,7 @@ export class VoiceService {
       (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      this.setStatus('error', 'Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.');
+      this.setStatus('error', this.langService.translate('NAVEGADOR_NO_SOPORTADO'));
       return;
     }
 
@@ -58,16 +60,16 @@ export class VoiceService {
 
     this.recognition.onresult = async (event: any) => {
       const texto = event.results[0][0].transcript;
-      this.setStatus('processing', `Escuché: "${texto}" — procesando con la IA...`);
+      this.setStatus('processing', this.langService.translate('PROCESANDO_IA').replace('{texto}', texto));
       await this.sendToIABackend(texto);
     };
 
     this.recognition.onerror = (event: any) => {
       this.isListening = false;
       if (event.error === 'no-speech') {
-        this.setStatus('unknown', 'No se detectó voz, intenta de nuevo');
+        this.setStatus('unknown', this.langService.translate('NO_VOZ'));
       } else {
-        this.setStatus('error', `Error de micrófono: ${event.error}`);
+        this.setStatus('error', this.langService.translate('ERROR_MIC').replace('{error}', event.error));
       }
     };
 
@@ -82,11 +84,11 @@ export class VoiceService {
     if (this.isListening) {
       this.recognition.stop();
       this.isListening = false;
-      this.setStatus('idle', 'Presiona el micrófono para hablar');
+      this.setStatus('idle', this.langService.translate('PRESIONA_MIC'));
     } else {
       this.recognition.start();
       this.isListening = true;
-      this.setStatus('listening', 'Escuchando... habla ahora');
+      this.setStatus('listening', this.langService.translate('ESCUCHANDO'));
     }
   }
 
@@ -103,7 +105,7 @@ export class VoiceService {
       if (normalizedText.includes('reposo') || normalizedText.includes('reposar')) {
         const cmd = 'REPOSO';
         this.lastCommand$.next(cmd);
-        this.setStatus('success', `Comando directo: ${cmd}`);
+        this.setStatus('success', this.langService.translate('COMANDO_DIRECTO').replace('{cmd}', cmd));
         await this.sendToEsp32(cmd.toLowerCase());
         return;
       }
@@ -111,7 +113,7 @@ export class VoiceService {
       if (normalizedText.includes('prueba') || normalizedText.includes('probar')) {
         const cmd = 'PRUEBA';
         this.lastCommand$.next(cmd);
-        this.setStatus('success', `Comando directo: ${cmd}`);
+        this.setStatus('success', this.langService.translate('COMANDO_DIRECTO').replace('{cmd}', cmd));
         await this.sendToEsp32(cmd.toLowerCase());
         return;
       }
@@ -126,7 +128,7 @@ export class VoiceService {
       // Validar si el comando es desconocido o si el porcentaje de confianza es menor a 65%
       if (command === 'desconocido' || confidence < 0.65) {
         const pct = Math.round(confidence * 100);
-        this.setStatus('unknown', `Comando no reconocido con certeza suficiente (${pct}%). Intenta de nuevo.`);
+        this.setStatus('unknown', this.langService.translate('BAJA_CERTEZA').replace('{pct}', pct.toString()));
         return;
       }
 
@@ -134,14 +136,14 @@ export class VoiceService {
       const pctChar = Math.round(confidence * 100);
 
       this.lastCommand$.next(upperCmd);
-      this.setStatus('success', `IA (${pctChar}% certeza): ${upperCmd}`);
+      this.setStatus('success', this.langService.translate('IA_EXITO').replace('{pct}', pctChar.toString()).replace('{cmd}', upperCmd));
 
       // Enviar orden al ESP32 si está encendido
       await this.sendToEsp32(command);
 
     } catch (err) {
       console.error('Error conectando con la API de IA:', err);
-      this.setStatus('error', 'Error al contactar el servidor de IA. Verifica tu conexión.');
+      this.setStatus('error', this.langService.translate('ERROR_CONEXION_IA'));
     }
   }
 
@@ -153,7 +155,7 @@ export class VoiceService {
       );
     } catch (err) {
       // El ESP32 puede estar apagado — notificamos sin interrumpir el flujo visual
-      this.setStatus('error', `No se pudo enviar el comando (${comando.toUpperCase()}) al brazo. ¿Está encendido?`);
+      this.setStatus('error', this.langService.translate('ERROR_ENVIO_BRAZO').replace('{cmd}', comando.toUpperCase()));
     }
   }
 

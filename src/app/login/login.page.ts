@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { AuthService } from '../services/auth';
+import { TranslatePipe } from '../pipes/translate.pipe';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe]
 })
 export class LoginPage {
   email = '';
