@@ -4,7 +4,7 @@ import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
 import { LanguageService } from './language.service';
 
 // IP del ESP32 en la red local
-const ESP32_URL = 'http://192.168.100.52';
+const ESP32_URL = 'http://192.168.120.43';
 
 
 const IA_BACKEND_URL = 'https://brazo-backend.vercel.app/api/comando';
