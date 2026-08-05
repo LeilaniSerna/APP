@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
 import { LanguageService } from './language.service';
 
-// IP del ESP32 en la red local
 const ESP32_URL = 'http://192.168.120.43';
 
 
