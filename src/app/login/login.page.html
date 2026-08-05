@@ -36,9 +36,6 @@
             <button class="w-full bg-gradient-to-r from-brandDeep to-brandLight text-white text-xs font-extrabold py-4 rounded-2xl" *ngIf="!isScanning" (click)="handleTraditionalLogin()">
                 {{ 'INICIAR_SESION' | translate }}
             </button>
-            <button (click)="handleBiometricLogin()" [disabled]="isScanning" class="w-full bg-bgDark/60 border border-borderBrand text-brandLight text-xs font-extrabold py-4 rounded-2xl">
-                {{ isScanning ? ('ESCANEANDO_ROSTRO' | translate) : ('ACCESO_FACIAL' | translate) }}
-            </button>
         </div>
     </div>
   </div>
