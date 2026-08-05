@@ -1,12 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
+import { LanguageService } from './language.service';
 
-// IP del ESP32 en la red local — cambia esto cuando tengas la IP real
-const ESP32_URL = '192.168.120.43';
+// IP del ESP32 en la red local
+const ESP32_URL = 'http://192.168.120.43';
 
-// Endpoint del backend en Vercel (ruta relativa en el mismo despliegue)
-const VERCEL_URL = '/api/comando';
+
+const IA_BACKEND_URL = 'https://brazo-backend.vercel.app/api/comando';
 
 export type VoiceStatus =
   | 'idle'
@@ -16,17 +17,39 @@ export type VoiceStatus =
   | 'unknown'
   | 'error';
 
+export interface IAResponse {
+  command: string;
+  confidence?: number;
+  method?: string;
+  probabilities?: Record<string, number>;
+  error?: string;
+}
+
+export interface LogMessage {
+  mensaje: string;
+  tipo: 'info' | 'success' | 'warning' | 'error' | 'esp32';
+  parametros?: Record<string, string>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class VoiceService {
   private recognition: any = null;
   private isListening = false;
 
-  // Estado observable para que el componente lo muestre
+  // Estado observable para los componentes de la interfaz
   status$ = new BehaviorSubject<VoiceStatus>('idle');
   lastCommand$ = new BehaviorSubject<string>('');
   statusMessage$ = new BehaviorSubject<string>('Presiona el micrófono para hablar');
+  log$ = new Subject<LogMessage>();
 
-  constructor(private http: HttpClient) {
+  private emitLog(mensaje: string, tipo: 'info' | 'success' | 'warning' | 'error' | 'esp32' = 'info', parametros?: Record<string, string>) {
+    this.log$.next({ mensaje, tipo, parametros });
+  }
+
+  private http = inject(HttpClient);
+  private langService = inject(LanguageService);
+
+  constructor() {
     this.initRecognition();
   }
 
@@ -36,7 +59,7 @@ export class VoiceService {
       (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      this.setStatus('error', 'Tu navegador no soporta reconocimiento de voz. Usa Chrome.');
+      this.setStatus('error', this.langService.translate('NAVEGADOR_NO_SOPORTADO'));
       return;
     }
 
@@ -48,16 +71,16 @@ export class VoiceService {
 
     this.recognition.onresult = async (event: any) => {
       const texto = event.results[0][0].transcript;
-      this.setStatus('processing', `Escuché: "${texto}" — procesando...`);
-      await this.sendToVercel(texto);
+      this.setStatus('processing', this.langService.translate('PROCESANDO_IA').replace('{texto}', texto));
+      await this.sendToIABackend(texto);
     };
 
     this.recognition.onerror = (event: any) => {
       this.isListening = false;
       if (event.error === 'no-speech') {
-        this.setStatus('unknown', 'No se detectó voz, intenta de nuevo');
+        this.setStatus('unknown', this.langService.translate('NO_VOZ'));
       } else {
-        this.setStatus('error', `Error de micrófono: ${event.error}`);
+        this.setStatus('error', this.langService.translate('ERROR_MIC').replace('{error}', event.error));
       }
     };
 
@@ -72,11 +95,11 @@ export class VoiceService {
     if (this.isListening) {
       this.recognition.stop();
       this.isListening = false;
-      this.setStatus('idle', 'Presiona el micrófono para hablar');
+      this.setStatus('idle', this.langService.translate('PRESIONA_MIC'));
     } else {
       this.recognition.start();
       this.isListening = true;
-      this.setStatus('listening', 'Escuchando... habla ahora');
+      this.setStatus('listening', this.langService.translate('ESCUCHANDO'));
     }
   }
 
@@ -84,34 +107,69 @@ export class VoiceService {
     return this.isListening;
   }
 
-  private async sendToVercel(texto: string) {
+  // Enviar el texto reconocido al backend de Inteligencia Artificial (ONNX CNN)
+  private async sendToIABackend(texto: string) {
     try {
-      const response: any = await firstValueFrom(
-        this.http.post(VERCEL_URL, { texto })
-      );
+      const normalizedText = (texto || '').toLowerCase().trim();
 
-      if (response.command === 'desconocido') {
-        this.setStatus('unknown', 'No entendí el comando, intenta de nuevo');
+      // Interceptar comandos especiales (bypass de la IA)
+      if (normalizedText.includes('reposo') || normalizedText.includes('reposar')) {
+        const cmd = 'REPOSO';
+        this.lastCommand$.next(cmd);
+        this.setStatus('success', this.langService.translate('COMANDO_DIRECTO').replace('{cmd}', cmd));
+        await this.sendToEsp32(cmd.toLowerCase());
         return;
       }
 
-      this.lastCommand$.next(response.command.toUpperCase());
-      this.setStatus('success', `Comando: ${response.command.toUpperCase()}`);
-      await this.sendToEsp32(response.command);
+      if (normalizedText.includes('prueba') || normalizedText.includes('probar')) {
+        const cmd = 'PRUEBA';
+        this.lastCommand$.next(cmd);
+        this.setStatus('success', this.langService.translate('COMANDO_DIRECTO').replace('{cmd}', cmd));
+        await this.sendToEsp32(cmd.toLowerCase());
+        return;
+      }
+
+      const response: IAResponse = await firstValueFrom(
+        this.http.post<IAResponse>(IA_BACKEND_URL, { texto })
+      );
+
+      const command = (response.command || '').toLowerCase();
+      const confidence = response.confidence !== undefined ? response.confidence : 1.0;
+
+      // Validar si el comando es desconocido o si el porcentaje de confianza es menor a 65%
+      if (command === 'desconocido' || confidence < 0.65) {
+        const pct = Math.round(confidence * 100);
+        this.setStatus('unknown', this.langService.translate('BAJA_CERTEZA').replace('{pct}', pct.toString()));
+        return;
+      }
+
+      const upperCmd = command.toUpperCase();
+      const pctChar = Math.round(confidence * 100);
+
+      this.lastCommand$.next(upperCmd);
+      this.setStatus('success', this.langService.translate('IA_EXITO').replace('{pct}', pctChar.toString()).replace('{cmd}', upperCmd));
+
+      // Enviar orden al ESP32 si está encendido
+      await this.sendToEsp32(command);
 
     } catch (err) {
-      this.setStatus('error', 'Error al contactar el servidor, verifica tu conexión');
+      console.error('Error conectando con la API de IA:', err);
+      this.setStatus('error', this.langService.translate('ERROR_CONEXION_IA'));
     }
   }
 
-  private async sendToEsp32(comando: string) {
+  // Enviar comando al ESP32
+  async sendToEsp32(comando: string) {
     try {
+      this.emitLog('LOG_ESP32_ENVIANDO', 'info', { cmd: comando.toUpperCase(), url: ESP32_URL });
       await firstValueFrom(
         this.http.post(`${ESP32_URL}/comando`, { comando }, { responseType: 'text' })
       );
+      this.emitLog('LOG_ESP32_EXITO', 'success', { cmd: comando.toUpperCase() });
     } catch (err) {
-      // El ESP32 puede estar apagado — no rompemos la app, solo avisamos
-      this.setStatus('error', `Comando reconocido (${comando.toUpperCase()}) pero el brazo no respondió. ¿Está encendido?`);
+      // El ESP32 puede estar apagado — notificamos sin interrumpir el flujo visual
+      this.emitLog('LOG_ESP32_ERROR', 'error');
+      this.setStatus('error', this.langService.translate('ERROR_ENVIO_BRAZO').replace('{cmd}', comando.toUpperCase()));
     }
   }
 

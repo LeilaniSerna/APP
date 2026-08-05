@@ -181,7 +181,7 @@
               Ejecutar <i class="fas fa-play text-[10px] ml-1"></i>
             </span>
             <span *ngIf="ejecutandoRutina && rutinaEnEjecucionId === (rutina._id || rutina.titulo)">
-              <i class="fas fa-spinner fa-spin mr-1"></i> En curso...
+              <i class="fas fa-spinner fa-spin mr-1"></i> {{ 'EN_CURSO' | translate }}
             </span>
           </button>
         </div>

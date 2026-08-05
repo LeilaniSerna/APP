@@ -1,10 +1,12 @@
-import { Component, OnDestroy, AfterViewInit, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, AfterViewInit, OnInit, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { VoiceService, VoiceStatus } from '../services/voice';
 import { RoutineService, Routine } from '../services/routine.service';
+import { LanguageService } from '../services/language.service';
+import { TranslatePipe } from '../pipes/translate.pipe';
 import { addIcons } from 'ionicons';
 import { mic, micOutline, optionsOutline, addOutline, closeOutline, backspaceOutline } from 'ionicons/icons';
 import {
@@ -42,6 +44,7 @@ declare const Chart: any;
     IonFab,
     IonFabButton,
     IonModal,
+    TranslatePipe
   ],
 })
 export class HomePage implements OnInit, OnDestroy, AfterViewInit {
@@ -93,29 +96,92 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   showToast = false;
   toastMessage = '';
 
+  // Consola de Logs en tiempo real
+  logs: Array<{
+    timestamp: string;
+    mensaje: string;
+    tipo: 'info' | 'success' | 'warning' | 'error' | 'esp32';
+    parametros?: Record<string, string>;
+  }> = [];
+
   private subs = new Subscription();
 
-  constructor(
-    public voiceService: VoiceService,
-    private routineService: RoutineService,
-    private router: Router
-  ) {
+  public voiceService = inject(VoiceService);
+  private routineService = inject(RoutineService);
+  private router = inject(Router);
+  public langService = inject(LanguageService);
+
+  get translatedRobotState(): string {
+    if (this.robotState.startsWith('Ejecutando: ')) {
+      const cmd = this.robotState.replace('Ejecutando: ', '').toUpperCase();
+      return `${this.langService.translate('EJECUTANDO')}: ${this.langService.translate(cmd)}`;
+    }
+    return this.langService.translate(this.robotState);
+  }
+
+  constructor() {
     addIcons({ mic, micOutline, optionsOutline, addOutline, closeOutline, backspaceOutline });
 
     this.subs.add(
-      this.voiceService.status$.subscribe((s) => (this.voiceStatus = s))
+      this.voiceService.status$.subscribe((s) => {
+        this.voiceStatus = s;
+        if (s === 'listening') {
+          this.agregarLog('LOG_MIC_ACTIVO', 'info');
+        } else if (s === 'processing') {
+          this.agregarLog('LOG_PROCESANDO_AUDIO', 'info');
+        }
+      })
     );
     this.subs.add(
       this.voiceService.statusMessage$.subscribe((m) => (this.statusMessage = m))
     );
     this.subs.add(
       this.voiceService.lastCommand$.subscribe((cmd) => {
-        if (cmd) this.applyCommand(cmd);
+        if (cmd) {
+          this.agregarLog('LOG_VOZ_COMANDO', 'success', { cmd });
+          this.applyCommand(cmd);
+        }
+      })
+    );
+    this.subs.add(
+      this.voiceService.log$.subscribe((log) => {
+        this.agregarLog(log.mensaje, log.tipo, log.parametros);
       })
     );
   }
 
+  agregarLog(mensaje: string, tipo: 'info' | 'success' | 'warning' | 'error' | 'esp32' = 'info', parametros?: Record<string, string>) {
+    const ahora = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const timestamp = `${pad(ahora.getHours())}:${pad(ahora.getMinutes())}:${pad(ahora.getSeconds())}`;
+    this.logs.push({ timestamp, mensaje, tipo, parametros });
+    if (this.logs.length > 50) {
+      this.logs.shift();
+    }
+    setTimeout(() => {
+      const el = document.getElementById('log-terminal');
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+      }
+    }, 50);
+  }
+
+  getLogMensaje(log: any): string {
+    let msg = this.langService.translate(log.mensaje);
+    if (log.parametros) {
+      for (const key of Object.keys(log.parametros)) {
+        msg = msg.replace(`{${key}}`, this.langService.translate(log.parametros[key]));
+      }
+    }
+    return msg;
+  }
+
+  limpiarLogs() {
+    this.logs = [];
+  }
+
   ngOnInit() {
+    this.agregarLog('LOG_INICIALIZADO', 'info');
     this.cargarRutinas();
   }
 
@@ -308,10 +374,12 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   // --- GESTOR DE RUTINAS ---
   async ejecutarRutina(rutina: Routine) {
     if (this.ejecutandoRutina) {
-      this.mostrarToast('Ya hay una rutina en ejecución');
+      this.agregarLog('LOG_RUTINA_ERROR_EJECUCION', 'warning');
+      this.mostrarToast(this.langService.translate('YA_HAY_RUTINA'));
       return;
     }
 
+    this.agregarLog('LOG_RUTINA_INICIO', 'info', { titulo: rutina.titulo });
     this.ejecutandoRutina = true;
     this.rutinaEnEjecucionId = rutina._id || rutina.titulo;
     this.pasosCompletados = new Array(rutina.comandos.length).fill(false);
@@ -322,14 +390,17 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       this.pasoActivoIndex = i;
       this.progresoActual = ((i + 1) / rutina.comandos.length) * 100;
 
-      this.simulateVoice(comando.toUpperCase());
+      this.agregarLog('LOG_RUTINA_PASO', 'esp32', { paso: (i + 1).toString(), total: rutina.comandos.length.toString(), cmd: comando.toUpperCase() });
+      this.applyCommand(comando.toUpperCase());
+      await this.voiceService.sendToEsp32(comando.toLowerCase());
 
       await new Promise((r) => setTimeout(r, 1500));
 
       this.pasosCompletados[i] = true;
     }
 
-    this.mostrarToast('Rutina completada con éxito');
+    this.agregarLog('LOG_RUTINA_FIN', 'success', { titulo: rutina.titulo });
+    this.mostrarToast(this.langService.translate('RUTINA_COMPLETADA'));
     this.ejecutandoRutina = false;
     this.rutinaEnEjecucionId = null;
     this.pasoActivoIndex = -1;
@@ -361,6 +432,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   applyCommand(cmd: string) {
     const upperCmd = cmd.toUpperCase();
+    this.agregarLog('LOG_SIMULACION_COMANDO', 'info', { cmd: upperCmd });
     this.robotState = `Ejecutando: ${upperCmd}`;
     this.robotColor = 'text-accentWine';
     this.registrarConsumo(2.5);
@@ -392,21 +464,35 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       case 'DERECHA':
         this.arm1 = 'rotate(-30deg)';
         break;
+      case 'REPOSO':
+        this.gripT = 'translateY(0px)';
+        this.gripB = 'translateY(0px)';
+        this.glassOp = 'opacity-100';
+        this.arm1 = 'rotate(-45deg)';
+        this.arm2 = 'rotate(70deg)';
+        break;
+      case 'PRUEBA':
+        this.robotState = 'MODO PRUEBA';
+        this.robotColor = 'text-green-400';
+        break;
       case 'ALTO':
         this.robotState = 'DETENIDO';
         this.robotColor = 'text-red-400';
         break;
     }
 
+    const stateDelay = upperCmd === 'PRUEBA' ? 15000 : 1000;
     setTimeout(() => {
       if (this.robotState !== 'DETENIDO') {
         this.robotState = 'EN ESPERA';
         this.registrarConsumo(0.2);
       }
-    }, 1000);
+    }, stateDelay);
   }
 
   simulateVoice(cmd: string) {
+    this.agregarLog('LOG_MANUAL_BOTON', 'info', { cmd: cmd.toUpperCase() });
     this.applyCommand(cmd);
+    this.voiceService.sendToEsp32(cmd.toLowerCase());
   }
 }

@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, User } from '../services/auth';
+import { LanguageService } from '../services/language.service';
+import { TranslatePipe } from '../pipes/translate.pipe';
 import { addIcons } from 'ionicons';
 import {
   personOutline,
@@ -12,7 +14,8 @@ import {
   logOutOutline,
   saveOutline,
   checkmarkCircleOutline,
-  arrowBackOutline
+  arrowBackOutline,
+  globeOutline
 } from 'ionicons/icons';
 import {
   IonContent,
@@ -37,7 +40,8 @@ import {
     IonTitle,
     IonButtons,
     IonBackButton,
-    IonIcon
+    IonIcon,
+    TranslatePipe
   ]
 })
 export class ConfiguracionPage implements OnInit {
@@ -61,7 +65,13 @@ export class ConfiguracionPage implements OnInit {
   // Estado de guardado
   saveSuccess = false;
 
-  constructor(private router: Router, private authService: AuthService) {
+  private router = inject(Router);
+  private authService = inject(AuthService);
+  private langService = inject(LanguageService);
+
+  selectedLang = 'es';
+
+  constructor() {
     addIcons({
       personOutline,
       cameraOutline,
@@ -70,12 +80,19 @@ export class ConfiguracionPage implements OnInit {
       logOutOutline,
       saveOutline,
       checkmarkCircleOutline,
-      arrowBackOutline
+      arrowBackOutline,
+      globeOutline
     });
   }
 
   ngOnInit() {
+    this.selectedLang = this.langService.getCurrentLanguage();
     this.cargarPerfil();
+  }
+
+  changeLanguage(lang: string) {
+    this.selectedLang = lang;
+    this.langService.setLanguage(lang);
   }
 
   cargarPerfil() {

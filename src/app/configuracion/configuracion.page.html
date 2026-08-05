@@ -148,20 +148,38 @@
       </div>
     </div>
 
+    <!-- Tarjeta 4: Selector de Idioma / Language Selector -->
+    <div class="bg-bgCard border border-borderBrand p-6 rounded-3xl shadow-xl space-y-4">
+      <h2 class="text-xs font-bold text-textLight/60 uppercase tracking-wider flex items-center gap-2">
+        <ion-icon name="globe-outline" class="text-brandLight text-base"></ion-icon>
+        {{ 'IDIOMA' | translate }}
+      </h2>
+
+      <div class="space-y-3">
+        <div class="flex justify-between items-center text-xs font-semibold text-textLight">
+          <span class="opacity-80">{{ 'SELECCIONAR_IDIOMA' | translate }}</span>
+          <select [ngModel]="selectedLang" (ngModelChange)="changeLanguage($event)" class="bg-bgDark border border-borderBrand rounded-xl px-3 py-2 text-xs text-textLight outline-none">
+            <option value="es">Español</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
     <!-- Acciones: Guardar Cambios y Cerrar Sesión -->
     <div class="space-y-3 pt-2">
       <button 
         (click)="guardarPerfil()" 
         class="w-full bg-white hover:bg-gray-200 active:scale-95 text-gray-900 text-xs font-bold py-3.5 rounded-full shadow-xl transition flex items-center justify-center gap-2">
         <ion-icon name="save-outline" class="text-base"></ion-icon>
-        GUARDAR CAMBIOS
+        {{ 'GUARDAR_CAMBIOS' | translate }}
       </button>
 
       <button 
         (click)="handleLogout()" 
         class="w-full bg-[#0d0d0e]/80 hover:bg-black active:scale-95 text-rose-400 border border-rose-500/30 text-xs font-bold py-3.5 rounded-full transition flex items-center justify-center gap-2 shadow-lg">
         <ion-icon name="log-out-outline" class="text-base"></ion-icon>
-        CERRAR SESIÓN DEL PORTAL MÉDICO
+        {{ 'CERRAR_SESION' | translate }}
       </button>
     </div>
 
